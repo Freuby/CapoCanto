@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, DownloadCloud, Search } from 'lucide-react'; // Ajout de l'icône Search
+import { Settings, Trash2, DownloadCloud, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
-import { CATEGORY_COLORS, SongCategory } from '../types'; // Suppression de 'Song'
+import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
 import { ImportExportActions } from '../components/ImportExportActions';
 
@@ -28,7 +28,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
         (song.lyrics && song.lyrics.toLowerCase().includes(query))
       );
     })
-    .sort((a, b) => a.title.localeCompare(b.title, 'fr')); // Correction ici
+    .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 
   return (
     <section className="mb-8">
@@ -96,118 +96,122 @@ export const Home = () => {
   };
 
   return (
-    <div className="p-4 pb-20 safe-area-inset">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold truncate">CapoCanto</h1>
-        <div className="flex space-x-2 ml-2">
-          {selectedSongs.size > 0 && (
-            <>
+    <div className="min-h-screen bg-gray-50"> {/* Ajout d'un conteneur principal pour le défilement */}
+      <div className="sticky top-0 bg-gray-50 z-50 px-4 py-4 safe-area-inset-top"> {/* En-tête fixe */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold truncate">CapoCanto</h1>
+          <div className="flex space-x-2 ml-2">
+            {selectedSongs.size > 0 && (
+              <>
+                <button
+                  onClick={handleDeleteSelected}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                  title="Supprimer la sélection"
+                >
+                  <Trash2 size={20} />
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+                >
+                  Annuler
+                </button>
+              </>
+            )}
+            {songs.length > 0 && (
               <button
-                onClick={handleDeleteSelected}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
-                title="Supprimer la sélection"
+                onClick={handleDeleteAll}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                title="Tout supprimer"
               >
-                <Trash2 size={20} />
+                <Trash2 size={24} />
               </button>
-              <button
-                onClick={clearSelection}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-              >
-                Annuler
-              </button>
-            </>
-          )}
-          {songs.length > 0 && (
+            )}
             <button
-              onClick={handleDeleteAll}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-              title="Tout supprimer"
+              onClick={() => setShowImportExportActions(true)}
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Actions d'import/export"
             >
-              <Trash2 size={24} />
+              <DownloadCloud size={24} className="text-gray-600" />
             </button>
-          )}
-          <button
-            onClick={() => setShowImportExportActions(true)}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Actions d'import/export"
-          >
-            <DownloadCloud size={24} className="text-gray-600" />
-          </button>
-          <button
-            onClick={() => setShowSearchBar(prev => !prev)}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Rechercher"
-          >
-            <Search size={24} className="text-gray-600" />
-          </button>
-          <Link
-            to="/settings"
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <Settings size={24} className="text-gray-600" />
-          </Link>
+            <button
+              onClick={() => setShowSearchBar(prev => !prev)}
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="Rechercher"
+            >
+              <Search size={24} className="text-gray-600" />
+            </button>
+            <Link
+              to="/settings"
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <Settings size={24} className="text-gray-600" />
+            </Link>
+          </div>
         </div>
+
+        {showSearchBar && (
+          <input
+            type="text"
+            placeholder="Rechercher un chant..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4"
+          />
+        )}
       </div>
 
-      {showSearchBar && (
-        <input
-          type="text"
-          placeholder="Rechercher un chant..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mb-6"
+      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom"> {/* Contenu principal avec padding ajusté */}
+        <CategorySection
+          title="Angola"
+          category="angola"
+          color={CATEGORY_COLORS.angola}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
         />
-      )}
-
-      <CategorySection
-        title="Angola"
-        category="angola"
-        color={CATEGORY_COLORS.angola}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="São Bento Pequeno"
-        category="saoBentoPequeno"
-        color={CATEGORY_COLORS.saoBentoPequeno}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="São Bento Grande"
-        category="saoBentoGrande"
-        color={CATEGORY_COLORS.saoBentoGrande}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="Samba de roda"
-        category="sambaDeRoda"
-        color={CATEGORY_COLORS.sambaDeRoda}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="Maculêlê"
-        category="maculele"
-        color={CATEGORY_COLORS.maculele}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="Puxada de rede"
-        category="puxadaDeRede"
-        color={CATEGORY_COLORS.puxadaDeRede}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
-      <CategorySection
-        title="Autre"
-        category="autre"
-        color={CATEGORY_COLORS.autre}
-        loading={loadingSongs}
-        searchQuery={searchQuery}
-      />
+        <CategorySection
+          title="São Bento Pequeno"
+          category="saoBentoPequeno"
+          color={CATEGORY_COLORS.saoBentoPequeno}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="São Bento Grande"
+          category="saoBentoGrande"
+          color={CATEGORY_COLORS.saoBentoGrande}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Samba de roda"
+          category="sambaDeRoda"
+          color={CATEGORY_COLORS.sambaDeRoda}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Maculêlê"
+          category="maculele"
+          color={CATEGORY_COLORS.maculele}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Puxada de rede"
+          category="puxadaDeRede"
+          color={CATEGORY_COLORS.puxadaDeRede}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Autre"
+          category="autre"
+          color={CATEGORY_COLORS.autre}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+      </div>
 
       <ImportModal
         isOpen={showImportModal}
