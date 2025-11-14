@@ -10,7 +10,8 @@ const CategorySection: React.FC<{
   title: string;
   category: SongCategory;
   color: string;
-}> = ({ title, category, color }) => {
+  loading: boolean; // Ajout de la prop loading
+}> = ({ title, category, color, loading }) => {
   const { songs } = useSongs();
   const categorySongs = songs
     .filter(song => song.category === category)
@@ -26,17 +27,23 @@ const CategorySection: React.FC<{
           {categorySongs.length} chants
         </span>
       </div>
-      <div className="space-y-4">
-        {categorySongs.map(song => (
-          <SongCard key={song.id} song={song} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center text-gray-500">Chargement des chants...</div>
+      ) : categorySongs.length === 0 ? (
+        <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
+      ) : (
+        <div className="space-y-4">
+          {categorySongs.map(song => (
+            <SongCard key={song.id} song={song} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };
 
 export const Home = () => {
-  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs } = useSongs();
+  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
   const [showImportModal, setShowImportModal] = useState(false);
 
   const handleDeleteSelected = () => {
@@ -130,16 +137,19 @@ export const Home = () => {
         title="Angola"
         category="angola"
         color={CATEGORY_COLORS.angola}
+        loading={loadingSongs}
       />
       <CategorySection
         title="São Bento Pequeno"
         category="saoBentoPequeno"
         color={CATEGORY_COLORS.saoBentoPequeno}
+        loading={loadingSongs}
       />
       <CategorySection
         title="São Bento Grande"
         category="saoBentoGrande"
         color={CATEGORY_COLORS.saoBentoGrande}
+        loading={loadingSongs}
       />
 
       <ImportModal

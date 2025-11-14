@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Song, PrompterSettings, SongCategory } from '../types';
+import { supabase } from '../integrations/supabase/client';
+import { useSession } from './SessionContext'; // Import de useSession
 
 interface SongContextType {
   songs: Song[];
-  addSong: (song: Omit<Song, 'id'>) => void;
+  addSong: (song: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
   editSong: (song: Song) => void;
   deleteSong: (id: string) => void;
   deleteAllSongs: () => void;
@@ -14,7 +16,8 @@ interface SongContextType {
   toggleSongSelection: (id: string) => void;
   clearSelection: () => void;
   deleteSelectedSongs: () => void;
-  importSongs: (songs: Array<Omit<Song, 'id'>>) => void;
+  importSongs: (songs: Array<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => void;
+  loadingSongs: boolean; // Ajout de l'état de chargement
 }
 
 const defaultSettings: PrompterSettings = {
@@ -28,47 +31,124 @@ const defaultSettings: PrompterSettings = {
 const SongContext = createContext<SongContextType | null>(null);
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [songs, setSongs] = useState<Song[]>(() => {
-    const saved = localStorage.getItem('capoeiraSongs');
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const { session, loading: sessionLoading } = useSession();
+  const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
-
   const [prompterSettings, setPrompterSettings] = useState<PrompterSettings>(() => {
     const saved = localStorage.getItem('prompterSettings');
     return saved ? JSON.parse(saved) : defaultSettings;
   });
+  const [loadingSongs, setLoadingSongs] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem('capoeiraSongs', JSON.stringify(songs));
-  }, [songs]);
-
+  // Charger les paramètres du prompteur depuis localStorage
   useEffect(() => {
     localStorage.setItem('prompterSettings', JSON.stringify(prompterSettings));
   }, [prompterSettings]);
 
-  const addSong = (song: Omit<Song, 'id'>) => {
-    const newSong = { ...song, id: crypto.randomUUID() };
-    setSongs(prev => [...prev, newSong]);
+  // Fonction pour récupérer les chants depuis Supabase
+  const fetchSongs = useCallback(async () => {
+    if (!session?.user) {
+      setSongs([]);
+      setLoadingSongs(false);
+      return;
+    }
+
+    setLoadingSongs(true);
+    const { data, error } = await supabase
+      .from('songs')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('title', { ascending: true });
+
+    if (error) {
+      console.error('Erreur lors du chargement des chants:', error);
+      setSongs([]);
+    } else {
+      setSongs(data as Song[]);
+    }
+    setLoadingSongs(false);
+  }, [session]);
+
+  // Charger les chants au montage du composant ou lorsque la session change
+  useEffect(() => {
+    if (!sessionLoading) {
+      fetchSongs();
+    }
+  }, [sessionLoading, session, fetchSongs]);
+
+  const addSong = async (song: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!session?.user) return;
+
+    const { data, error } = await supabase
+      .from('songs')
+      .insert({ ...song, user_id: session.user.id })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erreur lors de l\'ajout du chant:', error);
+    } else if (data) {
+      setSongs(prev => [...prev, data as Song]);
+    }
   };
 
-  const editSong = (song: Song) => {
-    setSongs(prev => prev.map(s => s.id === song.id ? song : s));
+  const editSong = async (song: Song) => {
+    if (!session?.user) return;
+
+    const { data, error } = await supabase
+      .from('songs')
+      .update(song)
+      .eq('id', song.id)
+      .eq('user_id', session.user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erreur lors de la modification du chant:', error);
+    } else if (data) {
+      setSongs(prev => prev.map(s => s.id === data.id ? data as Song : s));
+    }
   };
 
-  const deleteSong = (id: string) => {
-    setSongs(prev => prev.filter(s => s.id !== id));
-    setSelectedSongs(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
+  const deleteSong = async (id: string) => {
+    if (!session?.user) return;
+
+    const { error } = await supabase
+      .from('songs')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+
+    if (error) {
+      console.error('Erreur lors de la suppression du chant:', error);
+    } else {
+      setSongs(prev => prev.filter(s => s.id !== id));
+      setSelectedSongs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
-  const deleteAllSongs = () => {
-    setSongs([]);
-    setSelectedSongs(new Set());
+  const deleteAllSongs = async () => {
+    if (!session?.user) return;
+
+    if (window.confirm('⚠️ Voulez-vous vraiment supprimer TOUS les chants ?')) {
+      if (window.confirm('Cette action est irréversible. Êtes-vous vraiment sûr ?')) {
+        const { error } = await supabase
+          .from('songs')
+          .delete()
+          .eq('user_id', session.user.id);
+
+        if (error) {
+          console.error('Erreur lors de la suppression de tous les chants:', error);
+        } else {
+          setSongs([]);
+          setSelectedSongs(new Set());
+        }
+      }
+    }
   };
 
   const toggleSongSelection = (id: string) => {
@@ -87,17 +167,43 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedSongs(new Set());
   };
 
-  const deleteSelectedSongs = () => {
-    setSongs(prev => prev.filter(song => !selectedSongs.has(song.id)));
-    clearSelection();
+  const deleteSelectedSongs = async () => {
+    if (!session?.user || selectedSongs.size === 0) return;
+
+    if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
+      const { error } = await supabase
+        .from('songs')
+        .delete()
+        .in('id', Array.from(selectedSongs))
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        console.error('Erreur lors de la suppression des chants sélectionnés:', error);
+      } else {
+        setSongs(prev => prev.filter(song => !selectedSongs.has(song.id)));
+        clearSelection();
+      }
+    }
   };
 
-  const importSongs = (newSongs: Array<Omit<Song, 'id'>>) => {
-    const songsToAdd = newSongs.map(song => ({
+  const importSongs = async (newSongs: Array<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    if (!session?.user || newSongs.length === 0) return;
+
+    const songsToInsert = newSongs.map(song => ({
       ...song,
-      id: crypto.randomUUID()
+      user_id: session.user.id
     }));
-    setSongs(prev => [...prev, ...songsToAdd]);
+
+    const { data, error } = await supabase
+      .from('songs')
+      .insert(songsToInsert)
+      .select();
+
+    if (error) {
+      console.error('Erreur lors de l\'importation des chants:', error);
+    } else if (data) {
+      setSongs(prev => [...prev, ...(data as Song[])]);
+    }
   };
 
   const getRandomSongByCategory = (category: SongCategory) => {
@@ -125,6 +231,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearSelection,
       deleteSelectedSongs,
       importSongs,
+      loadingSongs,
     }}>
       {children}
     </SongContext.Provider>

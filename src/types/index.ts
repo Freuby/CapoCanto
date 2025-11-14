@@ -7,6 +7,9 @@ export interface Song {
   mnemonic?: string;
   lyrics?: string;
   mediaLink?: string;
+  user_id: string; // Ajouté pour la liaison avec l'utilisateur Supabase
+  created_at: string; // Ajouté pour la date de création
+  updated_at: string; // Ajouté pour la date de dernière modification
 }
 
 export interface PrompterSettings {
