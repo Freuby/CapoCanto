@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, DownloadCloud, Search } from 'lucide-react';
+import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
@@ -17,7 +17,8 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
   const { songs } = useSongs();
-  
+  const [isExpanded, setIsExpanded] = useState(true); // État pour gérer le dépliage/pliage
+
   const filteredSongs = songs
     .filter(song => song.category === category)
     .filter(song => {
@@ -33,23 +34,31 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold" style={{ color }}>
-          {title}
-        </h2>
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)} 
+          className="flex items-center space-x-2 focus:outline-none"
+        >
+          <ChevronDown size={20} className={`transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} style={{ color }} />
+          <h2 className="text-xl font-bold" style={{ color }}>
+            {title}
+          </h2>
+        </button>
         <span className="text-sm text-gray-500">
           {filteredSongs.length} chants
         </span>
       </div>
-      {loading ? (
-        <div className="text-center text-gray-500">Chargement des chants...</div>
-      ) : filteredSongs.length === 0 ? (
-        <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
-      ) : (
-        <div className="space-y-4">
-          {filteredSongs.map(song => (
-            <SongCard key={song.id} song={song} />
-          ))}
-        </div>
+      {isExpanded && ( // Afficher le contenu seulement si isExpanded est vrai
+        loading ? (
+          <div className="text-center text-gray-500">Chargement des chants...</div>
+        ) : filteredSongs.length === 0 ? (
+          <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
+        ) : (
+          <div className="space-y-4">
+            {filteredSongs.map(song => (
+              <SongCard key={song.id} song={song} />
+            ))}
+          </div>
+        )
       )}
     </section>
   );
@@ -83,7 +92,6 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
-        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
