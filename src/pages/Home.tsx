@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, DownloadCloud } from 'lucide-react'; // Changement d'icône
+import { Settings, Trash2, DownloadCloud } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
-import { CATEGORY_COLORS, SongCategory } from '../types';
+import { CATEGORY_COLORS, SongCategory, Song } from '../types'; // Import de Song
 import { ImportModal } from '../components/ImportModal';
-import { ImportExportActions } from '../components/ImportExportActions'; // Import du nouveau composant
+import { ImportExportActions } from '../components/ImportExportActions';
 
-const CategorySection: React.FC<{
+interface CategorySectionProps {
   title: string;
   category: SongCategory;
   color: string;
   loading: boolean;
-}> = ({ title, category, color, loading }) => {
+  searchQuery: string; // Ajout de la prop searchQuery
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
   const { songs } = useSongs();
-  const categorySongs = songs
+  
+  const filteredSongs = songs
     .filter(song => song.category === category)
+    .filter(song => {
+      const query = searchQuery.toLowerCase();
+      return (
+        song.title.toLowerCase().includes(query) ||
+        (song.mnemonic && song.mnemonic.toLowerCase().includes(query)) ||
+        (song.lyrics && song.lyrics.toLowerCase().includes(query))
+      );
+    })
     .sort((a, b) => a.title.localeCompare(b, 'fr'));
 
   return (
@@ -25,16 +37,16 @@ const CategorySection: React.FC<{
           {title}
         </h2>
         <span className="text-sm text-gray-500">
-          {categorySongs.length} chants
+          {filteredSongs.length} chants
         </span>
       </div>
       {loading ? (
         <div className="text-center text-gray-500">Chargement des chants...</div>
-      ) : categorySongs.length === 0 ? (
+      ) : filteredSongs.length === 0 ? (
         <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
       ) : (
         <div className="space-y-4">
-          {categorySongs.map(song => (
+          {filteredSongs.map(song => (
             <SongCard key={song.id} song={song} />
           ))}
         </div>
@@ -46,7 +58,8 @@ const CategorySection: React.FC<{
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showImportExportActions, setShowImportExportActions] = useState(false); // Nouvel état pour la modale d'actions
+  const [showImportExportActions, setShowImportExportActions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // Nouvel état pour la recherche
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -113,11 +126,11 @@ export const Home = () => {
             </button>
           )}
           <button
-            onClick={() => setShowImportExportActions(true)} // Ouvre la nouvelle modale
+            onClick={() => setShowImportExportActions(true)}
             className="p-2 hover:bg-gray-100 rounded-full"
             title="Actions d'import/export"
           >
-            <DownloadCloud size={24} className="text-gray-600" /> {/* Nouvelle icône */}
+            <DownloadCloud size={24} className="text-gray-600" />
           </button>
           <Link
             to="/settings"
@@ -128,23 +141,34 @@ export const Home = () => {
         </div>
       </div>
 
+      <input
+        type="text"
+        placeholder="Rechercher un chant..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mb-6"
+      />
+
       <CategorySection
         title="Angola"
         category="angola"
         color={CATEGORY_COLORS.angola}
         loading={loadingSongs}
+        searchQuery={searchQuery}
       />
       <CategorySection
         title="São Bento Pequeno"
         category="saoBentoPequeno"
         color={CATEGORY_COLORS.saoBentoPequeno}
         loading={loadingSongs}
+        searchQuery={searchQuery}
       />
       <CategorySection
         title="São Bento Grande"
         category="saoBentoGrande"
         color={CATEGORY_COLORS.saoBentoGrande}
         loading={loadingSongs}
+        searchQuery={searchQuery}
       />
 
       <ImportModal
@@ -156,7 +180,7 @@ export const Home = () => {
       <ImportExportActions
         isOpen={showImportExportActions}
         onClose={() => setShowImportExportActions(false)}
-        onImportClick={() => setShowImportModal(true)} // Ouvre la modale d'importation existante
+        onImportClick={() => setShowImportModal(true)}
         onExportClick={handleExport}
       />
     </div>
