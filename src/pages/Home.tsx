@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Download, Upload } from 'lucide-react';
+import { Settings, Trash2, DownloadCloud } from 'lucide-react'; // Changement d'icône
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
+import { ImportExportActions } from '../components/ImportExportActions'; // Import du nouveau composant
 
 const CategorySection: React.FC<{
   title: string;
   category: SongCategory;
   color: string;
-  loading: boolean; // Ajout de la prop loading
+  loading: boolean;
 }> = ({ title, category, color, loading }) => {
   const { songs } = useSongs();
   const categorySongs = songs
@@ -45,6 +46,7 @@ const CategorySection: React.FC<{
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showImportExportActions, setShowImportExportActions] = useState(false); // Nouvel état pour la modale d'actions
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -111,18 +113,11 @@ export const Home = () => {
             </button>
           )}
           <button
-            onClick={handleExport}
+            onClick={() => setShowImportExportActions(true)} // Ouvre la nouvelle modale
             className="p-2 hover:bg-gray-100 rounded-full"
-            title="Exporter les chants (CSV)"
+            title="Actions d'import/export"
           >
-            <Upload size={24} className="text-gray-600" />
-          </button>
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Importer des chants (CSV)"
-          >
-            <Download size={24} className="text-gray-600" />
+            <DownloadCloud size={24} className="text-gray-600" /> {/* Nouvelle icône */}
           </button>
           <Link
             to="/settings"
@@ -156,6 +151,13 @@ export const Home = () => {
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImport={importSongs}
+      />
+
+      <ImportExportActions
+        isOpen={showImportExportActions}
+        onClose={() => setShowImportExportActions(false)}
+        onImportClick={() => setShowImportModal(true)} // Ouvre la modale d'importation existante
+        onExportClick={handleExport}
       />
     </div>
   );
