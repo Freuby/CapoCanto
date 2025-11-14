@@ -111,7 +111,7 @@ export const SongView = () => {
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} safe-area-inset`}>
-      <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-inherit">
+      <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-safe-area pb-4 bg-inherit">
         <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full"

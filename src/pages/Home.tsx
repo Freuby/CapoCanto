@@ -92,6 +92,7 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
+        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
@@ -105,7 +106,7 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50"> {/* Ajout d'un conteneur principal pour le défilement */}
-      <div className="sticky top-0 bg-black z-50 px-4 py-4 safe-area-inset-top"> {/* En-tête fixe */}
+      <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4"> {/* En-tête fixe */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
