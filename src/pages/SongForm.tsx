@@ -63,7 +63,7 @@ export const SongForm = () => {
 
   return (
     <div className="p-4 pb-20">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
         <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full"
