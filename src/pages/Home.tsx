@@ -83,7 +83,6 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
-        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
@@ -97,22 +96,22 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50"> {/* Ajout d'un conteneur principal pour le défilement */}
-      <div className="sticky top-0 bg-gray-50 z-50 px-4 py-4 safe-area-inset-top"> {/* En-tête fixe */}
+      <div className="sticky top-0 bg-[#A9A9A9] z-50 px-4 py-4 safe-area-inset-top"> {/* En-tête fixe */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold truncate">CapoCanto</h1>
+          <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
             {selectedSongs.size > 0 && (
               <>
                 <button
                   onClick={handleDeleteSelected}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                   title="Supprimer la sélection"
                 >
                   <Trash2 size={20} />
                 </button>
                 <button
                   onClick={clearSelection}
-                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+                  className="p-2 text-white hover:bg-gray-700 rounded-full"
                 >
                   Annuler
                 </button>
@@ -129,23 +128,23 @@ export const Home = () => {
             )}
             <button
               onClick={() => setShowImportExportActions(true)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-700 rounded-full"
               title="Actions d'import/export"
             >
-              <DownloadCloud size={24} className="text-gray-600" />
+              <DownloadCloud size={24} className="text-white" />
             </button>
             <button
               onClick={() => setShowSearchBar(prev => !prev)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-700 rounded-full"
               title="Rechercher"
             >
-              <Search size={24} className="text-gray-600" />
+              <Search size={24} className="text-white" />
             </button>
             <Link
               to="/settings"
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-700 rounded-full"
             >
-              <Settings size={24} className="text-gray-600" />
+              <Settings size={24} className="text-white" />
             </Link>
           </div>
         </div>
