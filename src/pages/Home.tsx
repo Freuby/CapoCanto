@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, DownloadCloud } from 'lucide-react';
+import { Settings, Trash2, DownloadCloud, Search } from 'lucide-react'; // Ajout de l'icône Search
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
-import { CATEGORY_COLORS, SongCategory, Song } from '../types'; // Import de Song
+import { CATEGORY_COLORS, SongCategory, Song } from '../types';
 import { ImportModal } from '../components/ImportModal';
 import { ImportExportActions } from '../components/ImportExportActions';
 
@@ -12,7 +12,7 @@ interface CategorySectionProps {
   category: SongCategory;
   color: string;
   loading: boolean;
-  searchQuery: string; // Ajout de la prop searchQuery
+  searchQuery: string;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
@@ -59,7 +59,8 @@ export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // Nouvel état pour la recherche
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchBar, setShowSearchBar] = useState(false); // Nouvel état pour la visibilité de la barre de recherche
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -82,7 +83,6 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
-        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
@@ -132,6 +132,13 @@ export const Home = () => {
           >
             <DownloadCloud size={24} className="text-gray-600" />
           </button>
+          <button
+            onClick={() => setShowSearchBar(prev => !prev)} // Bouton pour afficher/masquer la barre de recherche
+            className="p-2 hover:bg-gray-100 rounded-full"
+            title="Rechercher"
+          >
+            <Search size={24} className="text-gray-600" />
+          </button>
           <Link
             to="/settings"
             className="p-2 hover:bg-gray-100 rounded-full"
@@ -141,13 +148,15 @@ export const Home = () => {
         </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="Rechercher un chant..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mb-6"
-      />
+      {showSearchBar && ( // Affichage conditionnel de la barre de recherche
+        <input
+          type="text"
+          placeholder="Rechercher un chant..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mb-6"
+        />
+      )}
 
       <CategorySection
         title="Angola"
