@@ -83,6 +83,7 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
+        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
@@ -176,6 +177,34 @@ export const Home = () => {
         title="São Bento Grande"
         category="saoBentoGrande"
         color={CATEGORY_COLORS.saoBentoGrande}
+        loading={loadingSongs}
+        searchQuery={searchQuery}
+      />
+      <CategorySection
+        title="Samba de roda"
+        category="sambaDeRoda"
+        color={CATEGORY_COLORS.sambaDeRoda}
+        loading={loadingSongs}
+        searchQuery={searchQuery}
+      />
+      <CategorySection
+        title="Maculêlê"
+        category="maculele"
+        color={CATEGORY_COLORS.maculele}
+        loading={loadingSongs}
+        searchQuery={searchQuery}
+      />
+      <CategorySection
+        title="Puxada de rede"
+        category="puxadaDeRede"
+        color={CATEGORY_COLORS.puxadaDeRede}
+        loading={loadingSongs}
+        searchQuery={searchQuery}
+      />
+      <CategorySection
+        title="Autre"
+        category="autre"
+        color={CATEGORY_COLORS.autre}
         loading={loadingSongs}
         searchQuery={searchQuery}
       />

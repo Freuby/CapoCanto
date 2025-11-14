@@ -93,6 +93,10 @@ export const SongForm = () => {
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
             <option value="saoBentoGrande">São Bento Grande</option>
+            <option value="sambaDeRoda">Samba de roda</option>
+            <option value="maculele">Maculêlê</option>
+            <option value="puxadaDeRede">Puxada de rede</option>
+            <option value="autre">Autre</option>
           </select>
         </div>
 
