@@ -1,18 +1,18 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { SongProvider } from './context/SongContext';
-import { SessionProvider, useSession } from './context/SessionContext'; // Import SessionProvider et useSession
+import { SessionProvider, useSession } from './context/SessionContext';
 import { Navigation } from './components/Navigation';
 import { Home } from './pages/Home';
 import { SongForm } from './pages/SongForm';
 import { Prompter } from './pages/Prompter';
 import { Settings } from './pages/Settings';
 import { SongView } from './pages/SongView';
-import { Login } from './pages/Login'; // Import de la page de connexion
+import { Login } from './pages/Login';
 
 const AppContent = () => {
   const location = useLocation();
-  const { session, loading } = useSession(); // Utilisation du hook useSession
+  const { session, loading } = useSession();
   const hideNavigation = location.pathname === '/prompter' || location.pathname === '/login';
 
   if (loading) {
@@ -26,8 +26,8 @@ const AppContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
-        <Route path="/login" element={<Login />} /> {/* Route pour la page de connexion */}
-        {session ? ( // Afficher les routes protégées uniquement si l'utilisateur est connecté
+        <Route path="/login" element={<Login />} />
+        {session ? (
           <>
             <Route path="/" element={<Home />} />
             <Route path="/add" element={<SongForm />} />
@@ -37,7 +37,6 @@ const AppContent = () => {
             <Route path="/song/:id" element={<SongView />} />
           </>
         ) : (
-          // Rediriger vers la page de connexion si non connecté et tente d'accéder à une route protégée
           <Route path="*" element={<Login />} />
         )}
       </Routes>
@@ -48,12 +47,12 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <SongProvider>
-      <BrowserRouter>
-        <SessionProvider> {/* Envelopper AppContent avec SessionProvider */}
+    <BrowserRouter>
+      <SessionProvider> {/* SessionProvider doit envelopper SongProvider */}
+        <SongProvider> {/* SongProvider peut maintenant accéder à la session */}
           <AppContent />
-        </SessionProvider>
-      </BrowserRouter>
-    </SongProvider>
+        </SongProvider>
+      </SessionProvider>
+    </BrowserRouter>
   );
 }
