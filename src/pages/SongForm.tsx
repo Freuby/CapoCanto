@@ -4,9 +4,10 @@ import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
-const initialSong = {
+// Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
+const initialSong: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   title: '',
-  category: 'angola' as SongCategory,
+  category: 'angola',
   mnemonic: '',
   lyrics: '',
   mediaLink: '',
@@ -16,14 +17,18 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
-  const [formData, setFormData] = useState<Omit<Song, 'id'>>(initialSong);
+  // Le type de formData doit correspondre à initialSong
+  const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
-        setFormData(song);
+        // Lors de l'édition, nous avons un objet Song complet, mais formData ne gère pas id, user_id, created_at, updated_at
+        // Nous devons donc omettre ces propriétés lors de la mise à jour de formData
+        const { id: songId, user_id, created_at, updated_at, ...rest } = song;
+        setFormData(rest);
       }
     }
   }, [id, songs]);
@@ -38,7 +43,11 @@ export const SongForm = () => {
     
     setError('');
     if (id) {
-      editSong({ ...formData, id });
+      // Lors de l'édition, nous devons inclure l'id, user_id, created_at, updated_at
+      const existingSong = songs.find(s => s.id === id);
+      if (existingSong) {
+        editSong({ ...formData, id, user_id: existingSong.user_id, created_at: existingSong.created_at, updated_at: existingSong.updated_at });
+      }
     } else {
       addSong(formData);
     }

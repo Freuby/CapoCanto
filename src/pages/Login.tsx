@@ -1,4 +1,3 @@
-import React from 'react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../integrations/supabase/client';
@@ -10,14 +9,14 @@ export const Login = () => {
         <h1 className="text-2xl font-bold text-center mb-6">Connexion à CapoCanto</h1>
         <Auth
           supabaseClient={supabase}
-          providers={[]} // Pas de fournisseurs tiers pour l'instant
+          providers={[]}
           appearance={{
             theme: ThemeSupa,
             variables: {
               default: {
                 colors: {
-                  brand: '#0467B0', // Couleur principale de CapoCanto
-                  brandAccent: '#03A501', // Couleur d'accentuation
+                  brand: '#0467B0',
+                  brandAccent: '#03A501',
                 },
               },
             },

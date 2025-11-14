@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { SongProvider } from './context/SongContext';
 import { SessionProvider, useSession } from './context/SessionContext';
@@ -48,8 +47,8 @@ const AppContent = () => {
 export default function App() {
   return (
     <BrowserRouter>
-      <SessionProvider> {/* SessionProvider doit envelopper SongProvider */}
-        <SongProvider> {/* SongProvider peut maintenant accéder à la session */}
+      <SessionProvider>
+        <SongProvider>
           <AppContent />
         </SongProvider>
       </SessionProvider>

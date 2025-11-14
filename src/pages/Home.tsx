@@ -3,7 +3,7 @@ import { Settings, Trash2, DownloadCloud, Search } from 'lucide-react'; // Ajout
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { SongCard } from '../components/SongCard';
-import { CATEGORY_COLORS, SongCategory, Song } from '../types';
+import { CATEGORY_COLORS, SongCategory } from '../types'; // Suppression de 'Song'
 import { ImportModal } from '../components/ImportModal';
 import { ImportExportActions } from '../components/ImportExportActions';
 
@@ -28,7 +28,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
         (song.lyrics && song.lyrics.toLowerCase().includes(query))
       );
     })
-    .sort((a, b) => a.title.localeCompare(b, 'fr'));
+    .sort((a, b) => a.title.localeCompare(b.title, 'fr')); // Correction ici
 
   return (
     <section className="mb-8">
@@ -60,7 +60,7 @@ export const Home = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchBar, setShowSearchBar] = useState(false); // Nouvel état pour la visibilité de la barre de recherche
+  const [showSearchBar, setShowSearchBar] = useState(false);
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -134,7 +134,7 @@ export const Home = () => {
             <DownloadCloud size={24} className="text-gray-600" />
           </button>
           <button
-            onClick={() => setShowSearchBar(prev => !prev)} // Bouton pour afficher/masquer la barre de recherche
+            onClick={() => setShowSearchBar(prev => !prev)}
             className="p-2 hover:bg-gray-100 rounded-full"
             title="Rechercher"
           >
@@ -149,7 +149,7 @@ export const Home = () => {
         </div>
       </div>
 
-      {showSearchBar && ( // Affichage conditionnel de la barre de recherche
+      {showSearchBar && (
         <input
           type="text"
           placeholder="Rechercher un chant..."

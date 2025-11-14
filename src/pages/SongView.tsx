@@ -1,19 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Music, Play, Pause } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { CATEGORY_COLORS, READING_FONT_SIZE } from '../types';
+import { CATEGORY_COLORS, READING_FONT_SIZE, SongCategory } from '../types'; // Ajout de SongCategory
 
-const DEFAULT_BPM = {
+const DEFAULT_BPM: Record<SongCategory, number> = { // Typage de DEFAULT_BPM
   angola: 60,
   saoBentoPequeno: 85,
   saoBentoGrande: 120,
+  sambaDeRoda: 90, // Ajout des nouvelles catégories
+  maculele: 110,
+  puxadaDeRede: 70,
+  autre: 80,
 };
 
-const formatLyrics = (lyrics: string, category: string) => {
+const formatLyrics = (lyrics: string, category: SongCategory) => { // Typage de category
   return lyrics
     .split('\n')
-    .map((line, index) => {
+    .map((line, _index) => { // _index pour marquer comme inutilisé
       if (line.toLowerCase().includes('coro')) {
         return `<span style="color: ${CATEGORY_COLORS[category]}">${line}</span>`;
       }

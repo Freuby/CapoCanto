@@ -1,21 +1,20 @@
-import React from 'react';
 import { ArrowLeft, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import de useSession
-import { supabase } from '../integrations/supabase/client'; // Import de supabase
+import { useSession } from '../context/SessionContext';
+import { supabase } from '../integrations/supabase/client';
 
 export const Settings = () => {
   const navigate = useNavigate();
   const { prompterSettings, updatePrompterSettings } = useSongs();
-  const { session } = useSession(); // Récupération de la session
+  const { session } = useSession();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Erreur lors de la déconnexion:', error.message);
     } else {
-      navigate('/login'); // Rediriger vers la page de connexion après la déconnexion
+      navigate('/login');
     }
   };
 
