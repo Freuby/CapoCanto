@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext';
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
-import { showError } from '../utils/toast'; // Import showError
 
-const initialSong = {
+// Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
+const initialSong: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   title: '',
-  category: 'angola' as SongCategory,
+  category: 'angola',
   mnemonic: '',
   lyrics: '',
   mediaLink: '',
@@ -17,64 +16,54 @@ const initialSong = {
 export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { songs, addSong, editSong, deleteSong, loadingSongs } = useSongs();
-  const { isAdmin, loading: sessionLoading } = useSession();
-  const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id'>>(initialSong);
-  const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    if (!sessionLoading && !isAdmin) {
-      navigate('/');
-    }
-  }, [isAdmin, sessionLoading, navigate]);
+  const { songs, addSong, editSong, deleteSong } = useSongs();
+  // Le type de formData doit correspondre à initialSong
+  const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
-        setFormData(song);
-        setIsEditing(true);
-      } else if (!loadingSongs) {
-        // If song not found after loading, redirect
-        showError('Chant non trouvé.');
-        navigate('/');
+        // Lors de l'édition, nous avons un objet Song complet, mais formData ne gère pas id, user_id, created_at, updated_at
+        // Nous devons donc omettre ces propriétés lors de la mise à jour de formData
+        const { id: songId, user_id, created_at, updated_at, ...rest } = song;
+        setFormData(rest);
       }
-    } else {
-      setFormData(initialSong);
-      setIsEditing(false);
     }
-  }, [id, songs, loadingSongs, navigate]);
+  }, [id, songs]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title && !formData.mnemonic) {
-      showError('Le titre ou la phrase mnémotechnique est obligatoire');
+      setError('Le titre ou la phrase mnémotechnique est obligatoire');
       return;
     }
     
-    if (isEditing && id) {
-      await editSong({ ...formData, id, user_id: songs.find(s => s.id === id)?.user_id || '' } as Song);
+    setError('');
+    if (id) {
+      // Lors de l'édition, nous devons inclure l'id, user_id, created_at, updated_at
+      const existingSong = songs.find(s => s.id === id);
+      if (existingSong) {
+        editSong({ ...formData, id, user_id: existingSong.user_id, created_at: existingSong.created_at, updated_at: existingSong.updated_at });
+      }
     } else {
-      await addSong(formData);
+      addSong(formData);
     }
     navigate('/');
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (id && window.confirm('Voulez-vous vraiment supprimer ce chant ?')) {
-      await deleteSong(id);
+      deleteSong(id);
       navigate('/');
     }
   };
 
-  if (sessionLoading || !isAdmin) {
-    return null;
-  }
-
   return (
     <div className="p-4 pb-20">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
         <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full"
@@ -82,7 +71,7 @@ export const SongForm = () => {
           <ArrowLeft size={24} />
         </button>
         <h1 className="text-xl font-bold">
-          {isEditing ? 'Modifier le chant' : 'Ajouter un chant'}
+          {id ? 'Modifier le chant' : 'Ajouter un chant'}
         </h1>
         <div className="w-10" />
       </div>
@@ -113,9 +102,9 @@ export const SongForm = () => {
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
             <option value="saoBentoGrande">São Bento Grande</option>
-            <option value="sambaDeRoda">Samba de Roda</option>
-            <option value="maculele">Maculelê</option>
-            <option value="puxadaDeRede">Puxada de Rede</option>
+            <option value="sambaDeRoda">Samba de roda</option>
+            <option value="maculele">Maculêlê</option>
+            <option value="puxadaDeRede">Puxada de rede</option>
             <option value="autre">Autre</option>
           </select>
         </div>
@@ -134,6 +123,12 @@ export const SongForm = () => {
             Le titre ou la phrase mnémotechnique est obligatoire
           </p>
         </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -167,7 +162,7 @@ export const SongForm = () => {
             <Save size={20} />
             <span>Enregistrer</span>
           </button>
-          {isEditing && (
+          {id && (
             <button
               type="button"
               onClick={handleDelete}

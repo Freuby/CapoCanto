@@ -1,81 +1,55 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
-
-interface Profile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-  role: 'user' | 'admin';
-}
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SessionContextType {
   session: Session | null;
-  user: User | null;
-  profile: Profile | null;
   loading: boolean;
-  isAdmin: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      setSession(currentSession);
       setLoading(false);
-    };
 
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const getProfile = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, avatar_url, role')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          setProfile(null);
-        } else {
-          setProfile(data as Profile);
+      if (currentSession) {
+        // User is logged in, redirect to home if on login page
+        if (location.pathname === '/login') {
+          navigate('/');
         }
       } else {
-        setProfile(null);
+        // User is logged out, redirect to login page if not already there
+        if (location.pathname !== '/login') {
+          navigate('/login');
+        }
       }
-    };
+    });
 
-    getProfile();
-  }, [user]);
+    // Fetch initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setLoading(false);
+      if (initialSession && location.pathname === '/login') {
+        navigate('/');
+      } else if (!initialSession && location.pathname !== '/login') {
+        navigate('/login');
+      }
+    });
 
-  const isAdmin = profile?.role === 'admin';
+    return () => subscription.unsubscribe();
+  }, [navigate, location.pathname]);
 
   return (
-    <SessionContext.Provider value={{ session, user, profile, loading, isAdmin }}>
+    <SessionContext.Provider value={{ session, loading }}>
       {children}
     </SessionContext.Provider>
   );

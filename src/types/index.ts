@@ -2,12 +2,14 @@ export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande' | 'sa
 
 export interface Song {
   id: string;
-  user_id: string; // Added user_id
   title: string;
   category: SongCategory;
   mnemonic?: string;
   lyrics?: string;
   mediaLink?: string;
+  user_id: string; // Ajouté pour la liaison avec l'utilisateur Supabase
+  created_at: string; // Ajouté pour la date de création
+  updated_at: string; // Ajouté pour la date de dernière modification
 }
 
 export interface PrompterSettings {

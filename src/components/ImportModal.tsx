@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { SongCategory } from '../types';
-import { showError } from '../utils/toast'; // Import showError
+import { SongCategory } from '../types'; // Import de SongCategory
 
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (songs: Array<{
     title: string;
-    category: SongCategory;
+    category: SongCategory; // Utilisation du type SongCategory
     mnemonic?: string;
     lyrics?: string;
     mediaLink?: string;
@@ -82,7 +81,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
       }
 
       const headers = rows[0].map(h => h.toLowerCase().trim());
-      const validCategories: SongCategory[] = ['angola', 'saoBentoPequeno', 'saoBentoGrande', 'sambaDeRoda', 'maculele', 'puxadaDeRede', 'autre'];
+      const validCategories: SongCategory[] = ['angola', 'saoBentoPequeno', 'saoBentoGrande', 'sambaDeRoda', 'maculele', 'puxadaDeRede', 'autre']; // Mise à jour des catégories valides
 
       const songs = rows.slice(1).map((values, rowIndex) => {
         const song: any = {};
@@ -96,8 +95,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
           throw new Error(`Titre ou phrase mnémotechnique requis ligne ${rowIndex + 2}`);
         }
 
-        if (!validCategories.includes(song.category as SongCategory)) {
-          throw new Error(`Catégorie invalide '${song.category}' ligne ${rowIndex + 2}. Catégories valides: ${validCategories.join(', ')}`);
+        if (!validCategories.includes(song.category)) { // Utilisation des catégories valides
+          throw new Error(`Catégorie invalide ligne ${rowIndex + 2}. Catégories acceptées : ${validCategories.join(', ')}`);
         }
 
         return song;
@@ -107,7 +106,6 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur d\'importation');
-      showError(err instanceof Error ? err.message : 'Erreur d\'importation');
     }
   };
 

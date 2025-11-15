@@ -1,45 +1,75 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Download, Upload } from 'lucide-react';
+import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import useSession
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
+import { ImportExportActions } from '../components/ImportExportActions';
 
-const CategorySection: React.FC<{
+interface CategorySectionProps {
   title: string;
   category: SongCategory;
   color: string;
-}> = ({ title, category, color }) => {
+  loading: boolean;
+  searchQuery: string;
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
   const { songs } = useSongs();
-  const categorySongs = songs
+  const [isExpanded, setIsExpanded] = useState(true); // État pour gérer le dépliage/pliage
+
+  const filteredSongs = songs
     .filter(song => song.category === category)
-    .sort((a, b) => a.title.localeCompare(b, 'fr'));
+    .filter(song => {
+      const query = searchQuery.toLowerCase();
+      return (
+        song.title.toLowerCase().includes(query) ||
+        (song.mnemonic && song.mnemonic.toLowerCase().includes(query)) ||
+        (song.lyrics && song.lyrics.toLowerCase().includes(query))
+      );
+    })
+    .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold" style={{ color }}>
-          {title}
-        </h2>
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)} 
+          className="flex items-center space-x-2 focus:outline-none"
+        >
+          <ChevronDown size={20} className={`transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} style={{ color }} />
+          <h2 className="text-xl font-bold" style={{ color }}>
+            {title}
+          </h2>
+        </button>
         <span className="text-sm text-gray-500">
-          {categorySongs.length} chants
+          {filteredSongs.length} chants
         </span>
       </div>
-      <div className="space-y-4">
-        {categorySongs.map(song => (
-          <SongCard key={song.id} song={song} />
-        ))}
-      </div>
+      {isExpanded && ( // Afficher le contenu seulement si isExpanded est vrai
+        loading ? (
+          <div className="text-center text-gray-500">Chargement des chants...</div>
+        ) : filteredSongs.length === 0 ? (
+          <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
+        ) : (
+          <div className="space-y-4">
+            {filteredSongs.map(song => (
+              <SongCard key={song.id} song={song} />
+            ))}
+          </div>
+        )
+      )}
     </section>
   );
 };
 
 export const Home = () => {
-  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs } = useSongs();
-  const { isAdmin } = useSession(); // Get isAdmin from session context
+  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showImportExportActions, setShowImportExportActions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchBar, setShowSearchBar] = useState(false);
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -75,83 +105,134 @@ export const Home = () => {
   };
 
   return (
-    <div className="p-4 pb-20 safe-area-inset">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold truncate">CapoCanto</h1>
-        <div className="flex space-x-2 ml-2">
-          {isAdmin && selectedSongs.size > 0 && ( // Only show for admins
-            <>
+    <div className="min-h-screen bg-gray-50"> {/* Ajout d'un conteneur principal pour le défilement */}
+      <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4"> {/* En-tête fixe */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
+          <div className="flex space-x-2 ml-2">
+            {selectedSongs.size > 0 && (
+              <>
+                <button
+                  onClick={handleDeleteSelected}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                  title="Supprimer la sélection"
+                >
+                  <Trash2 size={20} />
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="p-2 text-white hover:bg-gray-700 rounded-full"
+                >
+                  Annuler
+                </button>
+              </>
+            )}
+            {songs.length > 0 && (
               <button
-                onClick={handleDeleteSelected}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
-                title="Supprimer la sélection"
+                onClick={handleDeleteAll}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                title="Tout supprimer"
               >
-                <Trash2 size={20} />
+                <Trash2 size={24} />
               </button>
-              <button
-                onClick={clearSelection}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-              >
-                Annuler
-              </button>
-            </>
-          )}
-          {isAdmin && songs.length > 0 && ( // Only show for admins
+            )}
             <button
-              onClick={handleDeleteAll}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-              title="Tout supprimer"
+              onClick={() => setShowImportExportActions(true)}
+              className="p-2 hover:bg-gray-700 rounded-full"
+              title="Actions d'import/export"
             >
-              <Trash2 size={24} />
+              <DownloadCloud size={24} className="text-white" />
             </button>
-          )}
-          {isAdmin && ( // Only show for admins
-            <>
-              <button
-                onClick={handleExport}
-                className="p-2 hover:bg-gray-100 rounded-full"
-                title="Exporter les chants (CSV)"
-              >
-                <Upload size={24} className="text-gray-600" />
-              </button>
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="p-2 hover:bg-gray-100 rounded-full"
-                title="Importer des chants (CSV)"
-              >
-                <Download size={24} className="text-gray-600" />
-              </button>
-            </>
-          )}
-          <Link
-            to="/settings"
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <Settings size={24} className="text-gray-600" />
-          </Link>
+            <button
+              onClick={() => setShowSearchBar(prev => !prev)}
+              className="p-2 hover:bg-gray-700 rounded-full"
+              title="Rechercher"
+            >
+              <Search size={24} className="text-white" />
+            </button>
+            <Link
+              to="/settings"
+              className="p-2 hover:bg-gray-700 rounded-full"
+            >
+              <Settings size={24} className="text-white" />
+            </Link>
+          </div>
         </div>
+
+        {showSearchBar && (
+          <input
+            type="text"
+            placeholder="Rechercher un chant..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4"
+          />
+        )}
       </div>
 
-      <CategorySection
-        title="Angola"
-        category="angola"
-        color={CATEGORY_COLORS.angola}
-      />
-      <CategorySection
-        title="São Bento Pequeno"
-        category="saoBentoPequeno"
-        color={CATEGORY_COLORS.saoBentoPequeno}
-      />
-      <CategorySection
-        title="São Bento Grande"
-        category="saoBentoGrande"
-        color={CATEGORY_COLORS.saoBentoGrande}
-      />
+      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom"> {/* Contenu principal avec padding ajusté */}
+        <CategorySection
+          title="Angola"
+          category="angola"
+          color={CATEGORY_COLORS.angola}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="São Bento Pequeno"
+          category="saoBentoPequeno"
+          color={CATEGORY_COLORS.saoBentoPequeno}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="São Bento Grande"
+          category="saoBentoGrande"
+          color={CATEGORY_COLORS.saoBentoGrande}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Samba de roda"
+          category="sambaDeRoda"
+          color={CATEGORY_COLORS.sambaDeRoda}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Maculêlê"
+          category="maculele"
+          color={CATEGORY_COLORS.maculele}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Puxada de rede"
+          category="puxadaDeRede"
+          color={CATEGORY_COLORS.puxadaDeRede}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+        <CategorySection
+          title="Autre"
+          category="autre"
+          color={CATEGORY_COLORS.autre}
+          loading={loadingSongs}
+          searchQuery={searchQuery}
+        />
+      </div>
 
       <ImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImport={importSongs}
+      />
+
+      <ImportExportActions
+        isOpen={showImportExportActions}
+        onClose={() => setShowImportExportActions(false)}
+        onImportClick={() => setShowImportModal(true)}
+        onExportClick={handleExport}
       />
     </div>
   );

@@ -1,11 +1,8 @@
-import React from 'react';
 import { Home, Plus, Play } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useSession } from '../context/SessionContext'; // Import useSession
 
 export const Navigation = () => {
   const location = useLocation();
-  const { isAdmin } = useSession(); // Get isAdmin from session context
   const hideNavigation = document.documentElement.classList.contains('reading-mode');
 
   if (hideNavigation) return null;
@@ -24,17 +21,15 @@ export const Navigation = () => {
           <Home size={24} />
           <span className="text-xs">Accueil</span>
         </Link>
-        {isAdmin && ( // Only show "Ajouter" link for admins
-          <Link
-            to="/add"
-            className={`flex flex-col items-center space-y-1 ${
-              isActive('/add') ? 'text-blue-600' : 'text-gray-600'
-            }`}
-          >
-            <Plus size={24} />
-            <span className="text-xs">Ajouter</span>
-          </Link>
-        )}
+        <Link
+          to="/add"
+          className={`flex flex-col items-center space-y-1 ${
+            isActive('/add') ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <Plus size={24} />
+          <span className="text-xs">Ajouter</span>
+        </Link>
         <Link
           to="/prompter"
           className={`flex flex-col items-center space-y-1 ${
