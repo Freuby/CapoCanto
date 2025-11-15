@@ -1,12 +1,10 @@
+import React from 'react';
 import { Home, Plus, Play } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useSession } from '../context/SessionContext'; // Import de useSession
 
 export const Navigation = () => {
   const location = useLocation();
-  const { userRole } = useSession(); // Récupération du rôle utilisateur
   const hideNavigation = document.documentElement.classList.contains('reading-mode');
-  const isAdmin = userRole === 'admin'; // Vérifie si l'utilisateur est admin
 
   if (hideNavigation) return null;
 
@@ -24,17 +22,15 @@ export const Navigation = () => {
           <Home size={24} />
           <span className="text-xs">Accueil</span>
         </Link>
-        {isAdmin && ( // Afficher le lien "Ajouter" seulement pour les admins
-          <Link
-            to="/add"
-            className={`flex flex-col items-center space-y-1 ${
-              isActive('/add') ? 'text-blue-600' : 'text-gray-600'
-            }`}
-          >
-            <Plus size={24} />
-            <span className="text-xs">Ajouter</span>
-          </Link>
-        )}
+        <Link
+          to="/add"
+          className={`flex flex-col items-center space-y-1 ${
+            isActive('/add') ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <Plus size={24} />
+          <span className="text-xs">Ajouter</span>
+        </Link>
         <Link
           to="/prompter"
           className={`flex flex-col items-center space-y-1 ${

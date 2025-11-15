@@ -1,4 +1,4 @@
-export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande' | 'sambaDeRoda' | 'maculele' | 'puxadaDeRede' | 'autre';
+export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande';
 
 export interface Song {
   id: string;
@@ -7,9 +7,6 @@ export interface Song {
   mnemonic?: string;
   lyrics?: string;
   mediaLink?: string;
-  user_id: string; // Ajouté pour la liaison avec l'utilisateur Supabase
-  created_at: string; // Ajouté pour la date de création
-  updated_at: string; // Ajouté pour la date de dernière modification
 }
 
 export interface PrompterSettings {
@@ -24,10 +21,6 @@ export const CATEGORY_COLORS = {
   angola: '#E8DF24',
   saoBentoPequeno: '#03A501',
   saoBentoGrande: '#0467B0',
-  sambaDeRoda: '#FF6347', // Tomato
-  maculele: '#8A2BE2', // BlueViolet
-  puxadaDeRede: '#FFD700', // Gold
-  autre: '#A9A9A9', // DarkGray
 } as const;
 
 export const FONT_SIZES = {

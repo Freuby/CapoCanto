@@ -1,26 +1,15 @@
-import { ArrowLeft, LogOut } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext';
-import { supabase } from '../integrations/supabase/client';
 
 export const Settings = () => {
   const navigate = useNavigate();
   const { prompterSettings, updatePrompterSettings } = useSongs();
-  const { session } = useSession();
-
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Erreur lors de la déconnexion:', error.message);
-    } else {
-      navigate('/login');
-    }
-  };
 
   return (
     <div className="p-4">
-      <div className="flex items-center mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
+      <div className="flex items-center mb-6">
         <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full"
@@ -29,20 +18,6 @@ export const Settings = () => {
         </button>
         <h1 className="text-xl font-bold ml-2">Paramètres du prompteur</h1>
       </div>
-
-      {session?.user && (
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h2 className="text-lg font-semibold mb-2">Compte utilisateur</h2>
-          <p className="text-gray-700 mb-4">Connecté en tant que : <span className="font-medium">{session.user.email}</span></p>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <LogOut size={20} />
-            <span>Déconnexion</span>
-          </button>
-        </div>
-      )}
 
       <div className="space-y-6">
         <div>

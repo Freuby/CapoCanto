@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import de useSession
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
-// Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
-const initialSong: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
+const initialSong = {
   title: '',
-  category: 'angola',
+  category: 'angola' as SongCategory,
   mnemonic: '',
   lyrics: '',
   mediaLink: '',
@@ -18,26 +16,14 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
-  const { userRole, loading: sessionLoading } = useSession(); // Récupération du rôle utilisateur et de l'état de chargement
-  // Le type de formData doit correspondre à initialSong
-  const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
+  const [formData, setFormData] = useState<Omit<Song, 'id'>>(initialSong);
   const [error, setError] = useState<string>('');
-
-  // Rediriger si l'utilisateur n'est pas admin
-  useEffect(() => {
-    if (!sessionLoading && userRole !== 'admin') {
-      navigate('/'); // Redirige vers la page d'accueil
-    }
-  }, [userRole, sessionLoading, navigate]);
 
   useEffect(() => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
-        // Lors de l'édition, nous avons un objet Song complet, mais formData ne gère pas id, user_id, created_at, updated_at
-        // Nous devons donc omettre ces propriétés lors de la mise à jour de formData
-        const { id: songId, user_id, created_at, updated_at, ...rest } = song;
-        setFormData(rest);
+        setFormData(song);
       }
     }
   }, [id, songs]);
@@ -52,11 +38,7 @@ export const SongForm = () => {
     
     setError('');
     if (id) {
-      // Lors de l'édition, nous devons inclure l'id, user_id, created_at, updated_at
-      const existingSong = songs.find(s => s.id === id);
-      if (existingSong) {
-        editSong({ ...formData, id, user_id: existingSong.user_id, created_at: existingSong.created_at, updated_at: existingSong.updated_at });
-      }
+      editSong({ ...formData, id });
     } else {
       addSong(formData);
     }
@@ -70,13 +52,9 @@ export const SongForm = () => {
     }
   };
 
-  if (sessionLoading || userRole !== 'admin') {
-    return null; // Ne rien afficher pendant le chargement ou si non-admin (la redirection se fera via useEffect)
-  }
-
   return (
     <div className="p-4 pb-20">
-      <div className="flex items-center justify-between mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
+      <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full"
@@ -115,10 +93,6 @@ export const SongForm = () => {
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
             <option value="saoBentoGrande">São Bento Grande</option>
-            <option value="sambaDeRoda">Samba de roda</option>
-            <option value="maculele">Maculêlê</option>
-            <option value="puxadaDeRede">Puxada de rede</option>
-            <option value="autre">Autre</option>
           </select>
         </div>
 

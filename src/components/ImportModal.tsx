@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { SongCategory } from '../types'; // Import de SongCategory
 
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (songs: Array<{
     title: string;
-    category: SongCategory; // Utilisation du type SongCategory
+    category: 'angola' | 'saoBentoPequeno' | 'saoBentoGrande';
     mnemonic?: string;
     lyrics?: string;
     mediaLink?: string;
@@ -81,8 +80,6 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
       }
 
       const headers = rows[0].map(h => h.toLowerCase().trim());
-      const validCategories: SongCategory[] = ['angola', 'saoBentoPequeno', 'saoBentoGrande', 'sambaDeRoda', 'maculele', 'puxadaDeRede', 'autre']; // Mise à jour des catégories valides
-
       const songs = rows.slice(1).map((values, rowIndex) => {
         const song: any = {};
         headers.forEach((header, index) => {
@@ -95,8 +92,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onImp
           throw new Error(`Titre ou phrase mnémotechnique requis ligne ${rowIndex + 2}`);
         }
 
-        if (!validCategories.includes(song.category)) { // Utilisation des catégories valides
-          throw new Error(`Catégorie invalide ligne ${rowIndex + 2}. Catégories acceptées : ${validCategories.join(', ')}`);
+        if (!['angola', 'saoBentoPequeno', 'saoBentoGrande'].includes(song.category)) {
+          throw new Error(`Catégorie invalide ligne ${rowIndex + 2}`);
         }
 
         return song;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { RotateCcw, Settings, Home, Music } from 'lucide-react'; // Ajout de Music
+import { RotateCcw, Settings, Home } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { Song, CATEGORY_COLORS, FONT_SIZES } from '../types';
