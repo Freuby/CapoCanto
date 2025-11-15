@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import de useSession
+import { useSession } from '../context/SessionContext';
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
@@ -18,7 +18,7 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
   const { songs } = useSongs();
-  const [isExpanded, setIsExpanded] = useState(true); // État pour gérer le dépliage/pliage
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const filteredSongs = songs
     .filter(song => song.category === category)
@@ -48,15 +48,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
             {title}
           </h2>
         </button>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 dark:text-gray-400"> {/* Ajout dark:text-gray-400 */}
           {songCountText}
         </span>
       </div>
-      {isExpanded && ( // Afficher le contenu seulement si isExpanded est vrai
+      {isExpanded && (
         loading ? (
-          <div className="text-center text-gray-500">Chargement des chants...</div>
+          <div className="text-center text-gray-500 dark:text-gray-400">Chargement des chants...</div> {/* Ajout dark:text-gray-400 */}
         ) : filteredSongs.length === 0 ? (
-          <div className="text-center text-gray-500">Aucun chant dans cette catégorie.</div>
+          <div className="text-center text-gray-500 dark:text-gray-400">Aucun chant dans cette catégorie.</div> {/* Ajout dark:text-gray-400 */}
         ) : (
           <div className="space-y-4">
             {filteredSongs.map(song => (
@@ -71,8 +71,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
 
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, loadingSongs } = useSongs();
-  const { userProfile } = useSession(); // Récupération du profil utilisateur
-  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
+  const { userProfile } = useSession();
+  const isAdmin = userProfile?.role === 'admin';
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
@@ -105,12 +105,12 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50"> {/* Ajout d'un conteneur principal pour le défilement */}
-      <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4"> {/* En-tête fixe */}
+    <div className="min-h-screen bg-gray-50 dark:bg-black"> {/* Changement ici */}
+      <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
-            {isAdmin && selectedSongs.size > 0 && ( // Afficher seulement pour les admins
+            {isAdmin && selectedSongs.size > 0 && (
               <>
                 <button
                   onClick={handleDeleteSelected}
@@ -127,7 +127,7 @@ export const Home = () => {
                 </button>
               </>
             )}
-            {isAdmin && ( // Afficher seulement pour les admins
+            {isAdmin && (
               <button
                 onClick={() => setShowImportExportActions(true)}
                 className="p-2 hover:bg-gray-700 rounded-full"
@@ -158,12 +158,12 @@ export const Home = () => {
             placeholder="Rechercher un chant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
           />
         )}
       </div>
 
-      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom"> {/* Contenu principal avec padding ajusté */}
+      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom">
         <CategorySection
           title="Angola"
           category="angola"
@@ -215,7 +215,7 @@ export const Home = () => {
         />
       </div>
 
-      {isAdmin && ( // Afficher seulement pour les admins
+      {isAdmin && (
         <ImportModal
           isOpen={showImportModal}
           onClose={() => setShowImportModal(false)}
@@ -223,7 +223,7 @@ export const Home = () => {
         />
       )}
 
-      {isAdmin && ( // Afficher seulement pour les admins
+      {isAdmin && (
         <ImportExportActions
           isOpen={showImportExportActions}
           onClose={() => setShowImportExportActions(false)}

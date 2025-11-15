@@ -2,14 +2,14 @@ import { ArrowLeft, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext';
-import { useAppContext } from '../context/AppContext'; // Import du nouveau contexte
+import { useAppContext } from '../context/AppContext';
 import { supabase } from '../integrations/supabase/client';
 
 export const Settings = () => {
   const navigate = useNavigate();
   const { prompterSettings, updatePrompterSettings } = useSongs();
   const { session, userProfile } = useSession();
-  const { appSettings, updateAppSettings } = useAppContext(); // Utilisation du nouveau contexte
+  const { appSettings, updateAppSettings } = useAppContext();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -23,7 +23,7 @@ export const Settings = () => {
   const accountTitle = userProfile?.role === 'admin' ? 'Compte administrateur' : 'Compte utilisateur';
 
   return (
-    <div className="p-4 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
+    <div className="p-4 dark:bg-black dark:text-gray-200 min-h-screen"> {/* Changement ici */}
       <div className="flex items-center mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}
@@ -48,7 +48,6 @@ export const Settings = () => {
         </div>
       )}
 
-      {/* Nouvelle section Paramètres généraux */}
       <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <h2 className="text-lg font-semibold mb-4">Paramètres généraux</h2>
         <div className="space-y-6">
