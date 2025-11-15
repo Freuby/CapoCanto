@@ -114,7 +114,7 @@ export const Home = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
-            {selectedSongs.size > 0 && (
+            {isAdmin && selectedSongs.size > 0 && ( // Afficher seulement pour les admins
               <>
                 <button
                   onClick={handleDeleteSelected}

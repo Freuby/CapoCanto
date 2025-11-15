@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
 // Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
@@ -17,6 +18,8 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
+  const { userProfile } = useSession(); // Récupération du profil utilisateur
+  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
   // Le type de formData doit correspondre à initialSong
   const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
@@ -162,7 +165,7 @@ export const SongForm = () => {
             <Save size={20} />
             <span>Enregistrer</span>
           </button>
-          {id && (
+          {id && isAdmin && ( // Afficher le bouton de suppression seulement pour les admins
             <button
               type="button"
               onClick={handleDelete}

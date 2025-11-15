@@ -3,6 +3,7 @@ import { Music, Edit } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Song, CATEGORY_COLORS } from '../types';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 
 interface SongCardProps {
   song: Song;
@@ -11,6 +12,8 @@ interface SongCardProps {
 
 export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) => {
   const { selectedSongs, toggleSongSelection } = useSongs();
+  const { userProfile } = useSession(); // Récupération du profil utilisateur
+  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
   const navigate = useNavigate();
   const isSelected = selectedSongs.has(song.id);
   const bgColor = CATEGORY_COLORS[song.category];
@@ -34,17 +37,19 @@ export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) 
     >
       <div className="flex justify-between items-start">
         <div className="flex items-start space-x-3">
-          <div 
-            className="mt-1"
-            onClick={e => e.stopPropagation()}
-          >
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-          </div>
+          {isAdmin && ( // Afficher la case à cocher seulement pour les admins
+            <div 
+              className="mt-1"
+              onClick={e => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </div>
+          )}
           <div>
             <h3 className="text-lg font-semibold">{song.title}</h3>
             {song.mnemonic && (
