@@ -57,7 +57,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase
       .from('songs')
       .select('*')
-      .eq('user_id', session.user.id)
+      // .eq('user_id', session.user.id) // Suppression du filtre user_id pour que tous les utilisateurs authentifiés voient tous les chants
       .order('title', { ascending: true });
 
     if (error) {
