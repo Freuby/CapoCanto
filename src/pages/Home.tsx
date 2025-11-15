@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
+import { useAppContext } from '../context/AppContext'; // Import du nouveau contexte
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
@@ -18,7 +19,7 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({ title, category, color, loading, searchQuery }) => {
   const { songs } = useSongs();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(true); // État pour gérer le dépliage/pliage
 
   const filteredSongs = songs
     .filter(song => song.category === category)
@@ -52,7 +53,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
           {songCountText}
         </span>
       </div>
-      {isExpanded && (
+      {isExpanded && ( // Afficher le contenu seulement si isExpanded est vrai
         loading ? (
           <div className="text-center text-gray-500 dark:text-gray-400">Chargement des chants...</div>
         ) : filteredSongs.length === 0 ? (
@@ -71,8 +72,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
 
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, loadingSongs } = useSongs();
-  const { userProfile } = useSession();
-  const isAdmin = userProfile?.role === 'admin';
+  const { userProfile } = useSession(); // Récupération du profil utilisateur
+  const { appSettings } = useAppContext(); // Utilisation du nouveau contexte
+  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
@@ -92,7 +94,6 @@ export const Home = () => {
         `"${song.title.replace(/"/g, '""')}"`,
         song.category,
         `"${(song.mnemonic || '').replace(/"/g, '""')}"`,
-        `"${(song.lyrics || '').replace(/"/g, '""')}"`,
         `"${(song.mediaLink || '').replace(/"/g, '""')}"`,
       ].join(','))
     ].join('\n');
@@ -105,49 +106,49 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900"> {/* Ajout d'un conteneur principal pour le défilement */}
+      <div className="sticky top-0 bg-blue-600 dark:bg-gray-800 z-50 px-4 pt-safe-area pb-4"> {/* En-tête fixe */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
+          <h1 className="text-2xl font-bold truncate text-white dark:text-gray-100">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
-            {isAdmin && selectedSongs.size > 0 && (
+            {isAdmin && selectedSongs.size > 0 && ( // Afficher seulement pour les admins
               <>
                 <button
                   onClick={handleDeleteSelected}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-full dark:hover:bg-red-900"
                   title="Supprimer la sélection"
                 >
                   <Trash2 size={20} />
                 </button>
                 <button
                   onClick={clearSelection}
-                  className="p-2 text-white hover:bg-gray-700 rounded-full"
+                  className="p-2 text-white hover:bg-blue-700 rounded-full dark:hover:bg-gray-700"
                 >
                   Annuler
                 </button>
               </>
             )}
-            {isAdmin && (
+            {isAdmin && ( // Afficher seulement pour les admins
               <button
                 onClick={() => setShowImportExportActions(true)}
-                className="p-2 hover:bg-gray-700 rounded-full"
+                className="p-2 hover:bg-blue-700 rounded-full dark:hover:bg-gray-700"
                 title="Actions d'import/export"
               >
-                <DownloadCloud size={24} className="text-white" />
+                <DownloadCloud size={24} className="text-white dark:text-gray-100" />
               </button>
             )}
             <button
               onClick={() => setShowSearchBar(prev => !prev)}
-              className="p-2 hover:bg-gray-700 rounded-full"
+              className="p-2 hover:bg-blue-700 rounded-full dark:hover:bg-gray-700"
               title="Rechercher"
             >
-              <Search size={24} className="text-white" />
+              <Search size={24} className="text-white dark:text-gray-100" />
             </button>
             <Link
               to="/settings"
-              className="p-2 hover:bg-gray-700 rounded-full"
+              className="p-2 hover:bg-blue-700 rounded-full dark:hover:bg-gray-700"
             >
-              <Settings size={24} className="text-white" />
+              <Settings size={24} className="text-white dark:text-gray-100" />
             </Link>
           </div>
         </div>
@@ -158,12 +159,12 @@ export const Home = () => {
             placeholder="Rechercher un chant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Changement ici */}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         )}
       </div>
 
-      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom dark:bg-black"> {/* Ajout dark:bg-black ici */}
+      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom"> {/* Contenu principal avec padding ajusté */}
         <CategorySection
           title="Angola"
           category="angola"
@@ -215,7 +216,7 @@ export const Home = () => {
         />
       </div>
 
-      {isAdmin && (
+      {isAdmin && ( // Afficher seulement pour les admins
         <ImportModal
           isOpen={showImportModal}
           onClose={() => setShowImportModal(false)}
@@ -223,7 +224,7 @@ export const Home = () => {
         />
       )}
 
-      {isAdmin && (
+      {isAdmin && ( // Afficher seulement pour les admins
         <ImportExportActions
           isOpen={showImportExportActions}
           onClose={() => setShowImportExportActions(false)}

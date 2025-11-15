@@ -2,14 +2,14 @@ import { ArrowLeft, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/AppContext'; // Import du nouveau contexte
 import { supabase } from '../integrations/supabase/client';
 
 export const Settings = () => {
   const navigate = useNavigate();
   const { prompterSettings, updatePrompterSettings } = useSongs();
   const { session, userProfile } = useSession();
-  const { appSettings, updateAppSettings } = useAppContext();
+  const { appSettings, updateAppSettings } = useAppContext(); // Utilisation du nouveau contexte
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -23,7 +23,7 @@ export const Settings = () => {
   const accountTitle = userProfile?.role === 'admin' ? 'Compte administrateur' : 'Compte utilisateur';
 
   return (
-    <div className="p-4 dark:bg-black dark:text-gray-200 min-h-screen">
+    <div className="p-4 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
       <div className="flex items-center mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}
@@ -35,7 +35,7 @@ export const Settings = () => {
       </div>
 
       {session?.user && (
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
+        <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           <h2 className="text-lg font-semibold mb-2">{accountTitle}</h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">Connecté en tant que : <span className="font-medium">{session.user.email}</span></p>
           <button
@@ -48,7 +48,8 @@ export const Settings = () => {
         </div>
       )}
 
-      <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
+      {/* Nouvelle section Paramètres généraux */}
+      <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <h2 className="text-lg font-semibold mb-4">Paramètres généraux</h2>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -87,7 +88,7 @@ export const Settings = () => {
         </div>
       </div>
 
-      <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
+      <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <h2 className="text-lg font-semibold mb-4">Paramètres du prompteur</h2>
         <div className="space-y-6">
           <div>
@@ -103,7 +104,7 @@ export const Settings = () => {
               onChange={e => updatePrompterSettings({
                 rotationInterval: Number(e.target.value)
               })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
 
@@ -116,7 +117,7 @@ export const Settings = () => {
               onChange={e => updatePrompterSettings({
                 fontSize: e.target.value as 'small' | 'medium' | 'large'
               })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             >
               <option value="small">Petite</option>
               <option value="medium">Moyenne</option>

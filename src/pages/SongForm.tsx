@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
 // Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
@@ -18,13 +18,15 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
-  const { userProfile, loading: sessionLoading } = useSession();
-  const isAdmin = userProfile?.role === 'admin';
+  const { userProfile, loading: sessionLoading } = useSession(); // Récupération du profil utilisateur et état de chargement
+  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
+  // Le type de formData doit correspondre à initialSong
   const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (!sessionLoading) {
+      // Si c'est une nouvelle création (pas d'ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
       if (!id && !isAdmin) {
         navigate('/');
       }
@@ -35,6 +37,8 @@ export const SongForm = () => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
+        // Lors de l'édition, nous avons un objet Song complet, mais formData ne gère pas id, user_id, created_at, updated_at
+        // Nous devons donc omettre ces propriétés lors de la mise à jour de formData
         const { id: songId, user_id, created_at, updated_at, ...rest } = song;
         setFormData(rest);
       }
@@ -51,6 +55,7 @@ export const SongForm = () => {
     
     setError('');
     if (id) {
+      // Lors de l'édition, nous devons inclure l'id, user_id, created_at, updated_at
       const existingSong = songs.find(s => s.id === id);
       if (existingSong) {
         editSong({ ...formData, id, user_id: existingSong.user_id, created_at: existingSong.created_at, updated_at: existingSong.updated_at });
@@ -68,16 +73,17 @@ export const SongForm = () => {
     }
   };
 
+  // Si la session est en cours de chargement ou si l'utilisateur n'est pas admin et tente d'ajouter, ne rien afficher
   if (sessionLoading || (!id && !isAdmin)) {
     return null; 
   }
 
   return (
-    <div className="p-4 pb-20 dark:bg-black dark:text-gray-200"> {/* Ajout dark:bg-black et dark:text-gray-200 */}
-      <div className="flex items-center justify-between mb-6 pt-safe-area">
+    <div className="p-4 pb-20">
+      <div className="flex items-center justify-between mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full" {/* Ajout dark:hover:bg-gray-800 */}
+          className="p-2 hover:bg-gray-100 rounded-full"
         >
           <ArrowLeft size={24} />
         </button>
@@ -89,25 +95,25 @@ export const SongForm = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Titre
           </label>
           <input
             type="text"
             value={formData.title}
             onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Catégorie
           </label>
           <select
             value={formData.category}
             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as SongCategory }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             style={{ backgroundColor: `${CATEGORY_COLORS[formData.category]}15` }}
           >
             <option value="angola">Angola</option>
@@ -121,16 +127,16 @@ export const SongForm = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Phrase mnémotechnique
           </label>
           <input
             type="text"
             value={formData.mnemonic || ''}
             onChange={e => setFormData(prev => ({ ...prev, mnemonic: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400"> {/* Ajout dark:text-gray-400 */}
+          <p className="mt-1 text-sm text-gray-500">
             Le titre ou la phrase mnémotechnique est obligatoire
           </p>
         </div>
@@ -142,26 +148,26 @@ export const SongForm = () => {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Paroles
           </label>
           <textarea
             value={formData.lyrics || ''}
             onChange={e => setFormData(prev => ({ ...prev, lyrics: e.target.value }))}
             rows={4}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Lien média
           </label>
           <input
             type="url"
             value={formData.mediaLink || ''}
             onChange={e => setFormData(prev => ({ ...prev, mediaLink: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -173,11 +179,11 @@ export const SongForm = () => {
             <Save size={20} />
             <span>Enregistrer</span>
           </button>
-          {id && isAdmin && (
+          {id && isAdmin && ( // Afficher le bouton de suppression seulement pour les admins
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center dark:border-red-500 dark:text-red-500" {/* Ajout dark styles */}
+              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center"
             >
               <Trash size={20} />
             </button>

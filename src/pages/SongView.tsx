@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Music, Play, Pause } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
+import { useAppContext } from '../context/AppContext'; // Import du contexte pour le mode sombre
 import { CATEGORY_COLORS, READING_FONT_SIZE, SongCategory } from '../types'; // Ajout de SongCategory
 
 const DEFAULT_BPM: Record<SongCategory, number> = { // Typage de DEFAULT_BPM
@@ -30,6 +31,7 @@ export const SongView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, prompterSettings } = useSongs();
+  const { appSettings } = useAppContext(); // Utilisation du contexte pour le mode sombre
   const song = songs.find((s) => s.id === id);
   const [isReading, setIsReading] = useState(false);
   const [bpm, setBpm] = useState(0);
@@ -106,15 +108,16 @@ export const SongView = () => {
 
   if (!song) return null;
 
-  const textColor = prompterSettings.isDarkMode ? 'text-white' : 'text-black';
-  const bgColor = prompterSettings.isDarkMode ? 'bg-black' : 'bg-white';
+  // Utilisation du mode sombre de l'application pour la page SongView
+  const textColor = appSettings.isAppDarkMode ? 'text-white' : 'text-black';
+  const bgColor = appSettings.isAppDarkMode ? 'bg-gray-900' : 'bg-white';
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} safe-area-inset`}>
-      <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-safe-area pb-4 bg-inherit">
+      <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-safe-area pb-4 bg-inherit dark:bg-gray-900">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-full"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
         >
           <ArrowLeft size={24} />
         </button>
@@ -123,7 +126,7 @@ export const SongView = () => {
             <>
               <button
                 onClick={toggleReading}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
               >
                 {isReading ? <Pause size={24} /> : <Play size={24} />}
               </button>
@@ -142,7 +145,7 @@ export const SongView = () => {
                         startScrolling();
                       }
                     }}
-                    className="w-24"
+                    className="w-24 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <span className="text-sm">{bpm} BPM</span>
                 </div>
@@ -158,7 +161,7 @@ export const SongView = () => {
 
           {song.mnemonic && (
             <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
                 Phrase mnémotechnique
               </h2>
               <p className="text-lg">{song.mnemonic}</p>
@@ -167,7 +170,7 @@ export const SongView = () => {
 
           {song.lyrics && (
             <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
                 Paroles
               </h2>
               <pre
@@ -181,12 +184,12 @@ export const SongView = () => {
 
           {song.mediaLink && (
             <div className="mb-6">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">Média</h2>
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Média</h2>
               <a
                 href={song.mediaLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
+                className="text-blue-600 hover:underline break-all dark:text-blue-400"
               >
                 {song.mediaLink}
               </a>
@@ -213,12 +216,12 @@ export const SongView = () => {
       )}
 
       {song.mediaLink && !isReading && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 bg-inherit border-t">
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-inherit border-t dark:bg-gray-900 dark:border-gray-700">
           <a
             href={song.mediaLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center space-x-2 w-full py-3 bg-blue-600 text-white rounded-lg"
+            className="flex items-center justify-center space-x-2 w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Music size={20} />
             <span>Voir le média</span>
