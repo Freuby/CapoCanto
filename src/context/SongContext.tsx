@@ -31,7 +31,7 @@ const defaultSettings: PrompterSettings = {
 const SongContext = createContext<SongContextType | null>(null);
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { session, loading: sessionLoading } = useSession();
+  const { session, loading: sessionLoading, userRole } = useSession(); // Récupération du rôle utilisateur
   const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [prompterSettings, setPrompterSettings] = useState<PrompterSettings>(() => {
@@ -57,8 +57,7 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase
       .from('songs')
       .select('*')
-      .eq('user_id', session.user.id)
-      .order('title', { ascending: true });
+      .order('title', { ascending: true }); // La politique RLS gérera la visibilité
 
     if (error) {
       console.error('Erreur lors du chargement des chants:', error);
@@ -77,7 +76,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [sessionLoading, session, fetchSongs]);
 
   const addSong = async (song: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!session?.user) return;
+    if (!session?.user || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent ajouter des chants.');
+      return;
+    }
 
     const { data, error } = await supabase
       .from('songs')
@@ -93,14 +95,16 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const editSong = async (song: Song) => {
-    if (!session?.user) return;
+    if (!session?.user || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent modifier des chants.');
+      return;
+    }
 
     const { data, error } = await supabase
       .from('songs')
       .update(song)
       .eq('id', song.id)
-      .eq('user_id', session.user.id)
-      .select()
+      .select() // La politique RLS gérera l'accès par user_id
       .single();
 
     if (error) {
@@ -111,13 +115,15 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteSong = async (id: string) => {
-    if (!session?.user) return;
+    if (!session?.user || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent supprimer des chants.');
+      return;
+    }
 
     const { error } = await supabase
       .from('songs')
       .delete()
-      .eq('id', id)
-      .eq('user_id', session.user.id);
+      .eq('id', id); // La politique RLS gérera l'accès par user_id
 
     if (error) {
       console.error('Erreur lors de la suppression du chant:', error);
@@ -132,14 +138,17 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteAllSongs = async () => {
-    if (!session?.user) return;
+    if (!session?.user || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent supprimer tous les chants.');
+      return;
+    }
 
     if (window.confirm('⚠️ Voulez-vous vraiment supprimer TOUS les chants ?')) {
       if (window.confirm('Cette action est irréversible. Êtes-vous vraiment sûr ?')) {
         const { error } = await supabase
           .from('songs')
           .delete()
-          .eq('user_id', session.user.id);
+          .neq('user_id', '00000000-0000-0000-0000-000000000000'); // Supprime tous les chants (RLS gérera l'accès admin)
 
         if (error) {
           console.error('Erreur lors de la suppression de tous les chants:', error);
@@ -168,14 +177,16 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteSelectedSongs = async () => {
-    if (!session?.user || selectedSongs.size === 0) return;
+    if (!session?.user || selectedSongs.size === 0 || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent supprimer les chants sélectionnés.');
+      return;
+    }
 
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
       const { error } = await supabase
         .from('songs')
         .delete()
-        .in('id', Array.from(selectedSongs))
-        .eq('user_id', session.user.id);
+        .in('id', Array.from(selectedSongs)); // La politique RLS gérera l'accès par user_id
 
       if (error) {
         console.error('Erreur lors de la suppression des chants sélectionnés:', error);
@@ -187,7 +198,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const importSongs = async (newSongs: Array<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
-    if (!session?.user || newSongs.length === 0) return;
+    if (!session?.user || newSongs.length === 0 || userRole !== 'admin') {
+      console.warn('Permission refusée: Seuls les administrateurs peuvent importer des chants.');
+      return;
+    }
 
     const songsToInsert = newSongs.map(song => ({
       ...song,

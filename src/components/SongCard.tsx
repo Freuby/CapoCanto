@@ -3,6 +3,7 @@ import { Music, Edit } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Song, CATEGORY_COLORS } from '../types';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 
 interface SongCardProps {
   song: Song;
@@ -11,9 +12,11 @@ interface SongCardProps {
 
 export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) => {
   const { selectedSongs, toggleSongSelection } = useSongs();
+  const { userRole } = useSession(); // Récupération du rôle utilisateur
   const navigate = useNavigate();
   const isSelected = selectedSongs.has(song.id);
   const bgColor = CATEGORY_COLORS[song.category];
+  const isAdmin = userRole === 'admin'; // Vérifie si l'utilisateur est admin
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -38,12 +41,14 @@ export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) 
             className="mt-1"
             onClick={e => e.stopPropagation()}
           >
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
+            {isAdmin && ( // Afficher la checkbox seulement pour les admins
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            )}
           </div>
           <div>
             <h3 className="text-lg font-semibold">{song.title}</h3>
@@ -52,7 +57,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) 
             )}
           </div>
         </div>
-        {showActions && (
+        {showActions && isAdmin && ( // Afficher le bouton d'édition seulement pour les admins
           <Link
             to={`/edit/${song.id}`}
             className="p-2 hover:bg-gray-100 rounded-full"

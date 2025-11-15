@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
@@ -66,10 +67,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
 
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
+  const { userRole } = useSession(); // Récupération du rôle utilisateur
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  const isAdmin = userRole === 'admin'; // Vérifie si l'utilisateur est admin
 
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
@@ -110,7 +114,7 @@ export const Home = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
           <div className="flex space-x-2 ml-2">
-            {selectedSongs.size > 0 && (
+            {isAdmin && selectedSongs.size > 0 && ( // Afficher les actions de sélection seulement pour les admins
               <>
                 <button
                   onClick={handleDeleteSelected}
@@ -127,7 +131,7 @@ export const Home = () => {
                 </button>
               </>
             )}
-            {songs.length > 0 && (
+            {isAdmin && songs.length > 0 && ( // Afficher le bouton "Tout supprimer" seulement pour les admins
               <button
                 onClick={handleDeleteAll}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-full"
@@ -136,13 +140,15 @@ export const Home = () => {
                 <Trash2 size={24} />
               </button>
             )}
-            <button
-              onClick={() => setShowImportExportActions(true)}
-              className="p-2 hover:bg-gray-700 rounded-full"
-              title="Actions d'import/export"
-            >
-              <DownloadCloud size={24} className="text-white" />
-            </button>
+            {isAdmin && ( // Afficher le bouton d'import/export seulement pour les admins
+              <button
+                onClick={() => setShowImportExportActions(true)}
+                className="p-2 hover:bg-gray-700 rounded-full"
+                title="Actions d'import/export"
+              >
+                <DownloadCloud size={24} className="text-white" />
+              </button>
+            )}
             <button
               onClick={() => setShowSearchBar(prev => !prev)}
               className="p-2 hover:bg-gray-700 rounded-full"

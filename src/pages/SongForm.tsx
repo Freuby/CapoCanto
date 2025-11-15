@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
 // Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
@@ -17,9 +18,17 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
+  const { userRole, loading: sessionLoading } = useSession(); // Récupération du rôle utilisateur et de l'état de chargement
   // Le type de formData doit correspondre à initialSong
   const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
+
+  // Rediriger si l'utilisateur n'est pas admin
+  useEffect(() => {
+    if (!sessionLoading && userRole !== 'admin') {
+      navigate('/'); // Redirige vers la page d'accueil
+    }
+  }, [userRole, sessionLoading, navigate]);
 
   useEffect(() => {
     if (id) {
@@ -60,6 +69,10 @@ export const SongForm = () => {
       navigate('/');
     }
   };
+
+  if (sessionLoading || userRole !== 'admin') {
+    return null; // Ne rien afficher pendant le chargement ou si non-admin (la redirection se fera via useEffect)
+  }
 
   return (
     <div className="p-4 pb-20">
