@@ -7,7 +7,7 @@ import { supabase } from '../integrations/supabase/client';
 export const Settings = () => {
   const navigate = useNavigate();
   const { prompterSettings, updatePrompterSettings } = useSongs();
-  const { session } = useSession();
+  const { session, userProfile } = useSession(); // Récupération de userProfile
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -17,6 +17,8 @@ export const Settings = () => {
       navigate('/login');
     }
   };
+
+  const accountTitle = userProfile?.role === 'admin' ? 'Compte administrateur' : 'Compte utilisateur';
 
   return (
     <div className="p-4">
@@ -32,7 +34,7 @@ export const Settings = () => {
 
       {session?.user && (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h2 className="text-lg font-semibold mb-2">Compte utilisateur</h2>
+          <h2 className="text-lg font-semibold mb-2">{accountTitle}</h2> {/* Titre dynamique */}
           <p className="text-gray-700 mb-4">Connecté en tant que : <span className="font-medium">{session.user.email}</span></p>
           <button
             onClick={handleLogout}
