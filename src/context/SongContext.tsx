@@ -8,7 +8,6 @@ interface SongContextType {
   addSong: (song: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
   editSong: (song: Song) => void;
   deleteSong: (id: string) => void;
-  deleteAllSongs: () => void;
   getRandomSongByCategory: (category: SongCategory) => Song | null;
   prompterSettings: PrompterSettings;
   updatePrompterSettings: (settings: Partial<PrompterSettings>) => void;
@@ -131,26 +130,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const deleteAllSongs = async () => {
-    if (!session?.user) return;
-
-    if (window.confirm('⚠️ Voulez-vous vraiment supprimer TOUS les chants ?')) {
-      if (window.confirm('Cette action est irréversible. Êtes-vous vraiment sûr ?')) {
-        const { error } = await supabase
-          .from('songs')
-          .delete()
-          .eq('user_id', session.user.id);
-
-        if (error) {
-          console.error('Erreur lors de la suppression de tous les chants:', error);
-        } else {
-          setSongs([]);
-          setSelectedSongs(new Set());
-        }
-      }
-    }
-  };
-
   const toggleSongSelection = (id: string) => {
     setSelectedSongs(prev => {
       const newSet = new Set(prev);
@@ -222,7 +201,6 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addSong,
       editSong,
       deleteSong,
-      deleteAllSongs,
       getRandomSongByCategory,
       prompterSettings,
       updatePrompterSettings,

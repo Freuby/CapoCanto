@@ -66,7 +66,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
 };
 
 export const Home = () => {
-  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
+  const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, loadingSongs } = useSongs();
   const { userProfile } = useSession(); // Récupération du profil utilisateur
   const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
 
@@ -78,14 +78,6 @@ export const Home = () => {
   const handleDeleteSelected = () => {
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
       deleteSelectedSongs();
-    }
-  };
-
-  const handleDeleteAll = () => {
-    if (window.confirm('⚠️ Voulez-vous vraiment supprimer TOUS les chants ?')) {
-      if (window.confirm('Cette action est irréversible. Êtes-vous vraiment sûr ?')) {
-        deleteAllSongs();
-      }
     }
   };
 
@@ -130,15 +122,6 @@ export const Home = () => {
                   Annuler
                 </button>
               </>
-            )}
-            {isAdmin && songs.length > 0 && ( // Afficher seulement pour les admins
-              <button
-                onClick={handleDeleteAll}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-                title="Tout supprimer"
-              >
-                <Trash2 size={24} />
-              </button>
             )}
             {isAdmin && ( // Afficher seulement pour les admins
               <button
