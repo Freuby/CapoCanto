@@ -73,11 +73,11 @@ export const SongForm = () => {
   }
 
   return (
-    <div className="p-4 pb-20 dark:bg-black dark:text-gray-200">
+    <div className="p-4 pb-20 dark:bg-black dark:text-gray-200"> {/* Ajout dark:bg-black et dark:text-gray-200 */}
       <div className="flex items-center justify-between mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full" {/* Ajout dark:hover:bg-gray-800 */}
         >
           <ArrowLeft size={24} />
         </button>
@@ -89,25 +89,25 @@ export const SongForm = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
             Titre
           </label>
           <input
             type="text"
             value={formData.title}
             onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
             Catégorie
           </label>
           <select
             value={formData.category}
             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as SongCategory }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
             style={{ backgroundColor: `${CATEGORY_COLORS[formData.category]}15` }}
           >
             <option value="angola">Angola</option>
@@ -121,16 +121,16 @@ export const SongForm = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
             Phrase mnémotechnique
           </label>
           <input
             type="text"
             value={formData.mnemonic || ''}
             onChange={e => setFormData(prev => ({ ...prev, mnemonic: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
           />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400"> {/* Ajout dark:text-gray-400 */}
             Le titre ou la phrase mnémotechnique est obligatoire
           </p>
         </div>
@@ -142,26 +142,26 @@ export const SongForm = () => {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
             Paroles
           </label>
           <textarea
             value={formData.lyrics || ''}
             onChange={e => setFormData(prev => ({ ...prev, lyrics: e.target.value }))}
             rows={4}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> {/* Ajout dark:text-gray-300 */}
             Lien média
           </label>
           <input
             type="url"
             value={formData.mediaLink || ''}
             onChange={e => setFormData(prev => ({ ...prev, mediaLink: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
           />
         </div>
 
@@ -177,7 +177,7 @@ export const SongForm = () => {
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center dark:border-red-500 dark:text-red-500"
+              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center dark:border-red-500 dark:text-red-500" {/* Ajout dark styles */}
             >
               <Trash size={20} />
             </button>
