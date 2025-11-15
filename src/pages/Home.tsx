@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import de useSession
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
@@ -66,6 +67,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
 
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs, loadingSongs } = useSongs();
+  const { userProfile } = useSession(); // Récupération du profil utilisateur
+  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
+
   const [showImportModal, setShowImportModal] = useState(false);
   const [showImportExportActions, setShowImportExportActions] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,7 +131,7 @@ export const Home = () => {
                 </button>
               </>
             )}
-            {songs.length > 0 && (
+            {isAdmin && songs.length > 0 && ( // Afficher seulement pour les admins
               <button
                 onClick={handleDeleteAll}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-full"
@@ -136,13 +140,15 @@ export const Home = () => {
                 <Trash2 size={24} />
               </button>
             )}
-            <button
-              onClick={() => setShowImportExportActions(true)}
-              className="p-2 hover:bg-gray-700 rounded-full"
-              title="Actions d'import/export"
-            >
-              <DownloadCloud size={24} className="text-white" />
-            </button>
+            {isAdmin && ( // Afficher seulement pour les admins
+              <button
+                onClick={() => setShowImportExportActions(true)}
+                className="p-2 hover:bg-gray-700 rounded-full"
+                title="Actions d'import/export"
+              >
+                <DownloadCloud size={24} className="text-white" />
+              </button>
+            )}
             <button
               onClick={() => setShowSearchBar(prev => !prev)}
               className="p-2 hover:bg-gray-700 rounded-full"
@@ -222,18 +228,22 @@ export const Home = () => {
         />
       </div>
 
-      <ImportModal
-        isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImport={importSongs}
-      />
+      {isAdmin && ( // Afficher seulement pour les admins
+        <ImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onImport={importSongs}
+        />
+      )}
 
-      <ImportExportActions
-        isOpen={showImportExportActions}
-        onClose={() => setShowImportExportActions(false)}
-        onImportClick={() => setShowImportModal(true)}
-        onExportClick={handleExport}
-      />
+      {isAdmin && ( // Afficher seulement pour les admins
+        <ImportExportActions
+          isOpen={showImportExportActions}
+          onClose={() => setShowImportExportActions(false)}
+          onImportClick={() => setShowImportModal(true)}
+          onExportClick={handleExport}
+        />
+      )}
     </div>
   );
 };

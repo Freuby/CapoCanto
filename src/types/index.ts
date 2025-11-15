@@ -1,5 +1,16 @@
 export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande' | 'sambaDeRoda' | 'maculele' | 'puxadaDeRede' | 'autre';
 
+export type UserRole = 'user' | 'admin'; // Nouveau type pour les rôles
+
+export interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  role: UserRole; // Ajout du rôle au profil
+  updated_at: string;
+}
+
 export interface Song {
   id: string;
   title: string;
