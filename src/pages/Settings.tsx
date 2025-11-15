@@ -23,7 +23,7 @@ export const Settings = () => {
   const accountTitle = userProfile?.role === 'admin' ? 'Compte administrateur' : 'Compte utilisateur';
 
   return (
-    <div className="p-4 dark:bg-black dark:text-gray-200 min-h-screen"> {/* Changement ici */}
+    <div className="p-4 dark:bg-black dark:text-gray-200 min-h-screen">
       <div className="flex items-center mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}

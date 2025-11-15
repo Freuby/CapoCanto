@@ -48,15 +48,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
             {title}
           </h2>
         </button>
-        <span className="text-sm text-gray-500 dark:text-gray-400"> {/* Ajout dark:text-gray-400 */}
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {songCountText}
         </span>
       </div>
       {isExpanded && (
         loading ? (
-          <div className="text-center text-gray-500 dark:text-gray-400">Chargement des chants...</div> {/* Ajout dark:text-gray-400 */}
+          <div className="text-center text-gray-500 dark:text-gray-400">Chargement des chants...</div>
         ) : filteredSongs.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400">Aucun chant dans cette catégorie.</div> {/* Ajout dark:text-gray-400 */}
+          <div className="text-center text-gray-500 dark:text-gray-400">Aucun chant dans cette catégorie.</div>
         ) : (
           <div className="space-y-4">
             {filteredSongs.map(song => (
@@ -105,7 +105,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black"> {/* Changement ici */}
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="sticky top-0 bg-black z-50 px-4 pt-safe-area pb-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold truncate text-white">CapoCanto</h1>
@@ -158,7 +158,7 @@ export const Home = () => {
             placeholder="Rechercher un chant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" {/* Ajout dark styles */}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         )}
       </div>

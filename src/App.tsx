@@ -18,14 +18,14 @@ const AppContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black"> {/* Changement ici */}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
         <p className="dark:text-gray-200">Chargement...</p>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${appSettings.isAppDarkMode ? 'dark' : ''} bg-gray-50 dark:bg-black`}> {/* Changement ici */}
+    <div className={`min-h-screen ${appSettings.isAppDarkMode ? 'dark' : ''} bg-gray-50 dark:bg-black`}>
       <Routes>
         <Route path="/login" element={<Login />} />
         {session ? (
