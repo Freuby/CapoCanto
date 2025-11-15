@@ -1,7 +1,8 @@
-export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande';
+export type SongCategory = 'angola' | 'saoBentoPequeno' | 'saoBentoGrande' | 'sambaDeRoda' | 'maculele' | 'puxadaDeRede' | 'autre';
 
 export interface Song {
   id: string;
+  user_id: string; // Added user_id
   title: string;
   category: SongCategory;
   mnemonic?: string;
@@ -21,6 +22,10 @@ export const CATEGORY_COLORS = {
   angola: '#E8DF24',
   saoBentoPequeno: '#03A501',
   saoBentoGrande: '#0467B0',
+  sambaDeRoda: '#FF6347', // Tomato
+  maculele: '#8A2BE2', // BlueViolet
+  puxadaDeRede: '#FFD700', // Gold
+  autre: '#A9A9A9', // DarkGray
 } as const;
 
 export const FONT_SIZES = {

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import useSession
+import { useSession } from '../context/SessionContext';
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
+import { showError } from '../utils/toast'; // Import showError
 
 const initialSong = {
   title: '',
@@ -16,52 +17,59 @@ const initialSong = {
 export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { songs, addSong, editSong, deleteSong } = useSongs();
-  const { isAdmin, loading } = useSession(); // Get isAdmin and loading from session context
-  const [formData, setFormData] = useState<Omit<Song, 'id'>>(initialSong);
-  const [error, setError] = useState<string>('');
+  const { songs, addSong, editSong, deleteSong, loadingSongs } = useSongs();
+  const { isAdmin, loading: sessionLoading } = useSession();
+  const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id'>>(initialSong);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (!loading && !isAdmin) { // Redirect if not admin and not loading
+    if (!sessionLoading && !isAdmin) {
       navigate('/');
     }
-  }, [isAdmin, loading, navigate]);
+  }, [isAdmin, sessionLoading, navigate]);
 
   useEffect(() => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
         setFormData(song);
+        setIsEditing(true);
+      } else if (!loadingSongs) {
+        // If song not found after loading, redirect
+        showError('Chant non trouvé.');
+        navigate('/');
       }
+    } else {
+      setFormData(initialSong);
+      setIsEditing(false);
     }
-  }, [id, songs]);
+  }, [id, songs, loadingSongs, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title && !formData.mnemonic) {
-      setError('Le titre ou la phrase mnémotechnique est obligatoire');
+      showError('Le titre ou la phrase mnémotechnique est obligatoire');
       return;
     }
     
-    setError('');
-    if (id) {
-      editSong({ ...formData, id });
+    if (isEditing && id) {
+      await editSong({ ...formData, id, user_id: songs.find(s => s.id === id)?.user_id || '' } as Song);
     } else {
-      addSong(formData);
+      await addSong(formData);
     }
     navigate('/');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (id && window.confirm('Voulez-vous vraiment supprimer ce chant ?')) {
-      deleteSong(id);
+      await deleteSong(id);
       navigate('/');
     }
   };
 
-  if (loading || !isAdmin) { // Show loading or nothing if not admin
-    return null; // Or a loading spinner, or a "permission denied" message
+  if (sessionLoading || !isAdmin) {
+    return null;
   }
 
   return (
@@ -74,7 +82,7 @@ export const SongForm = () => {
           <ArrowLeft size={24} />
         </button>
         <h1 className="text-xl font-bold">
-          {id ? 'Modifier le chant' : 'Ajouter un chant'}
+          {isEditing ? 'Modifier le chant' : 'Ajouter un chant'}
         </h1>
         <div className="w-10" />
       </div>
@@ -105,6 +113,10 @@ export const SongForm = () => {
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
             <option value="saoBentoGrande">São Bento Grande</option>
+            <option value="sambaDeRoda">Samba de Roda</option>
+            <option value="maculele">Maculelê</option>
+            <option value="puxadaDeRede">Puxada de Rede</option>
+            <option value="autre">Autre</option>
           </select>
         </div>
 
@@ -122,12 +134,6 @@ export const SongForm = () => {
             Le titre ou la phrase mnémotechnique est obligatoire
           </p>
         </div>
-
-        {error && (
-          <div className="p-3 bg-red-50 text-red-700 rounded">
-            {error}
-          </div>
-        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -161,7 +167,7 @@ export const SongForm = () => {
             <Save size={20} />
             <span>Enregistrer</span>
           </button>
-          {id && (
+          {isEditing && (
             <button
               type="button"
               onClick={handleDelete}
