@@ -32,6 +32,10 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
     })
     .sort((a, b) => a.title.localeCompare(b.title, 'fr'));
 
+  const songCountText = filteredSongs.length <= 1 
+    ? `${filteredSongs.length} chant` 
+    : `${filteredSongs.length} chants`;
+
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
@@ -45,7 +49,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, category, colo
           </h2>
         </button>
         <span className="text-sm text-gray-500">
-          {filteredSongs.length} chants
+          {songCountText}
         </span>
       </div>
       {isExpanded && ( // Afficher le contenu seulement si isExpanded est vrai
