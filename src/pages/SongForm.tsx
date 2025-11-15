@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import useSession
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
 const initialSong = {
@@ -16,8 +17,15 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
+  const { isAdmin, loading } = useSession(); // Get isAdmin and loading from session context
   const [formData, setFormData] = useState<Omit<Song, 'id'>>(initialSong);
   const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    if (!loading && !isAdmin) { // Redirect if not admin and not loading
+      navigate('/');
+    }
+  }, [isAdmin, loading, navigate]);
 
   useEffect(() => {
     if (id) {
@@ -51,6 +59,10 @@ export const SongForm = () => {
       navigate('/');
     }
   };
+
+  if (loading || !isAdmin) { // Show loading or nothing if not admin
+    return null; // Or a loading spinner, or a "permission denied" message
+  }
 
   return (
     <div className="p-4 pb-20">

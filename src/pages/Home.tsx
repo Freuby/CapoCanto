@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Trash2, Download, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
+import { useSession } from '../context/SessionContext'; // Import useSession
 import { SongCard } from '../components/SongCard';
 import { CATEGORY_COLORS, SongCategory } from '../types';
 import { ImportModal } from '../components/ImportModal';
@@ -37,6 +38,7 @@ const CategorySection: React.FC<{
 
 export const Home = () => {
   const { selectedSongs, deleteSelectedSongs, clearSelection, songs, importSongs, deleteAllSongs } = useSongs();
+  const { isAdmin } = useSession(); // Get isAdmin from session context
   const [showImportModal, setShowImportModal] = useState(false);
 
   const handleDeleteSelected = () => {
@@ -77,7 +79,7 @@ export const Home = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold truncate">CapoCanto</h1>
         <div className="flex space-x-2 ml-2">
-          {selectedSongs.size > 0 && (
+          {isAdmin && selectedSongs.size > 0 && ( // Only show for admins
             <>
               <button
                 onClick={handleDeleteSelected}
@@ -94,7 +96,7 @@ export const Home = () => {
               </button>
             </>
           )}
-          {songs.length > 0 && (
+          {isAdmin && songs.length > 0 && ( // Only show for admins
             <button
               onClick={handleDeleteAll}
               className="p-2 text-red-600 hover:bg-red-50 rounded-full"
@@ -103,20 +105,24 @@ export const Home = () => {
               <Trash2 size={24} />
             </button>
           )}
-          <button
-            onClick={handleExport}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Exporter les chants (CSV)"
-          >
-            <Upload size={24} className="text-gray-600" />
-          </button>
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            title="Importer des chants (CSV)"
-          >
-            <Download size={24} className="text-gray-600" />
-          </button>
+          {isAdmin && ( // Only show for admins
+            <>
+              <button
+                onClick={handleExport}
+                className="p-2 hover:bg-gray-100 rounded-full"
+                title="Exporter les chants (CSV)"
+              >
+                <Upload size={24} className="text-gray-600" />
+              </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+                title="Importer des chants (CSV)"
+              >
+                <Download size={24} className="text-gray-600" />
+              </button>
+            </>
+          )}
           <Link
             to="/settings"
             className="p-2 hover:bg-gray-100 rounded-full"
