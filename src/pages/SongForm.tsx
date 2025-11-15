@@ -18,11 +18,20 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
-  const { userProfile } = useSession(); // Récupération du profil utilisateur
+  const { userProfile, loading: sessionLoading } = useSession(); // Récupération du profil utilisateur et état de chargement
   const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
   // Le type de formData doit correspondre à initialSong
   const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    if (!sessionLoading) {
+      // Si c'est une nouvelle création (pas d'ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
+      if (!id && !isAdmin) {
+        navigate('/');
+      }
+    }
+  }, [id, isAdmin, navigate, sessionLoading]);
 
   useEffect(() => {
     if (id) {
@@ -63,6 +72,11 @@ export const SongForm = () => {
       navigate('/');
     }
   };
+
+  // Si la session est en cours de chargement ou si l'utilisateur n'est pas admin et tente d'ajouter, ne rien afficher
+  if (sessionLoading || (!id && !isAdmin)) {
+    return null; 
+  }
 
   return (
     <div className="p-4 pb-20">
