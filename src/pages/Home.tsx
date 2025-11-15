@@ -158,12 +158,12 @@ export const Home = () => {
             placeholder="Rechercher un chant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200" {/* Changement ici */}
           />
         )}
       </div>
 
-      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom">
+      <div className="px-4 pt-4 pb-20 safe-area-inset-bottom dark:bg-black"> {/* Ajout dark:bg-black ici */}
         <CategorySection
           title="Angola"
           category="angola"
