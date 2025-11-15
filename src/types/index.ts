@@ -26,9 +26,14 @@ export interface Song {
 export interface PrompterSettings {
   rotationInterval: number;
   fontSize: 'small' | 'medium' | 'large';
-  isDarkMode: boolean;
+  isDarkMode: boolean; // Ce paramètre reste pour le prompteur uniquement
   useHighContrast: boolean;
   upperCase: boolean;
+}
+
+export interface AppSettings { // Nouveaux paramètres d'application globaux
+  isAppDarkMode: boolean;
+  useVividColors: boolean;
 }
 
 export const CATEGORY_COLORS = {
@@ -39,6 +44,16 @@ export const CATEGORY_COLORS = {
   maculele: '#8A2BE2', // BlueViolet
   puxadaDeRede: '#FFD700', // Gold
   autre: '#A9A9A9', // DarkGray
+} as const;
+
+export const VIVID_CATEGORY_COLORS = { // Couleurs vives pour les tuiles
+  angola: '#FFD700', // Gold
+  saoBentoPequeno: '#32CD32', // LimeGreen
+  saoBentoGrande: '#1E90FF', // DodgerBlue
+  sambaDeRoda: '#FF4500', // OrangeRed
+  maculele: '#9932CC', // DarkOrchid
+  puxadaDeRede: '#FFC107', // Amber
+  autre: '#778899', // LightSlateGray
 } as const;
 
 export const FONT_SIZES = {

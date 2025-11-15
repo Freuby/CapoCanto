@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { SongProvider } from './context/SongContext';
 import { SessionProvider, useSession } from './context/SessionContext';
+import { AppProvider, useAppContext } from './context/AppContext'; // Import du nouveau contexte
 import { Navigation } from './components/Navigation';
 import { Home } from './pages/Home';
 import { SongForm } from './pages/SongForm';
@@ -12,18 +13,19 @@ import { Login } from './pages/Login';
 const AppContent = () => {
   const location = useLocation();
   const { session, loading } = useSession();
+  const { appSettings } = useAppContext(); // Utilisation du nouveau contexte
   const hideNavigation = location.pathname === '/prompter' || location.pathname === '/login';
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p>Chargement...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <p className="dark:text-gray-200">Chargement...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${appSettings.isAppDarkMode ? 'dark' : ''} bg-gray-50 dark:bg-gray-900`}>
       <Routes>
         <Route path="/login" element={<Login />} />
         {session ? (
@@ -48,9 +50,11 @@ export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <SessionProvider>
-        <SongProvider>
-          <AppContent />
-        </SongProvider>
+        <AppProvider> {/* Envelopper avec le nouveau AppProvider */}
+          <SongProvider>
+            <AppContent />
+          </SongProvider>
+        </AppProvider>
       </SessionProvider>
     </BrowserRouter>
   );
