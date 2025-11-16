@@ -183,32 +183,29 @@ export const SongView = () => {
           <ArrowLeft size={24} />
         </button>
         <div className="flex items-center space-x-4">
-          {song.lyrics && (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleReading(); }}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                {isReading ? <Pause size={24} /> : <Play size={24} />}
-              </button>
-              {isReading && (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="range"
-                    min="30"
-                    max="150"
-                    step="10"
-                    value={bpm}
-                    onChange={(e) => {
-                      setBpm(Number(e.target.value));
-                      // L'effet useEffect pour le changement de BPM gérera le redémarrage du défilement
-                    }}
-                    className="w-24"
-                  />
-                  <span className="text-sm">{bpm} BPM</span>
-                </div>
-              )}
-            </>
+          {song.lyrics && !isReading && ( // Afficher le bouton Play uniquement si pas en mode lecture
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleReading(); }}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <Play size={24} />
+            </button>
+          )}
+          {song.lyrics && isReading && ( // Afficher le curseur BPM uniquement si en mode lecture
+            <div className="flex items-center space-x-2">
+              <input
+                type="range"
+                min="30"
+                max="150"
+                step="10"
+                value={bpm}
+                onChange={(e) => {
+                  setBpm(Number(e.target.value));
+                }}
+                className="w-24"
+              />
+              <span className="text-sm">{bpm} BPM</span>
+            </div>
           )}
         </div>
       </div>
