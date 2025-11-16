@@ -27,7 +27,8 @@ export const SongForm = () => {
   useEffect(() => {
     if (!sessionLoading) {
       // Si c'est une nouvelle création (pas d'ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
-      if (!id && !isAdmin) {
+      // Ou si c'est une édition (ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
+      if ((!id && !isAdmin) || (id && !isAdmin)) {
         navigate('/');
       }
     }
@@ -73,10 +74,13 @@ export const SongForm = () => {
     }
   };
 
-  // Si la session est en cours de chargement ou si l'utilisateur n'est pas admin et tente d'ajouter, ne rien afficher
-  if (sessionLoading || (!id && !isAdmin)) {
+  // Si la session est en cours de chargement ou si l'utilisateur n'est pas admin et tente d'ajouter/éditer, ne rien afficher
+  if (sessionLoading || (!id && !isAdmin) || (id && !isAdmin)) {
     return null; 
   }
+
+  const isEditing = !!id;
+  const canSubmit = isAdmin || !isEditing; // Les non-admins peuvent soumettre seulement s'ils ne sont pas en mode édition (ce cas est déjà géré par la redirection)
 
   return (
     <div className="p-4 pb-20">
@@ -103,6 +107,7 @@ export const SongForm = () => {
             value={formData.title}
             onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           />
         </div>
 
@@ -115,6 +120,7 @@ export const SongForm = () => {
             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as SongCategory }))}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             style={{ backgroundColor: `${CATEGORY_COLORS[formData.category]}15` }}
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           >
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
@@ -135,6 +141,7 @@ export const SongForm = () => {
             value={formData.mnemonic || ''}
             onChange={e => setFormData(prev => ({ ...prev, mnemonic: e.target.value }))}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           />
           <p className="mt-1 text-sm text-gray-500">
             Le titre ou la phrase mnémotechnique est obligatoire
@@ -156,6 +163,7 @@ export const SongForm = () => {
             onChange={e => setFormData(prev => ({ ...prev, lyrics: e.target.value }))}
             rows={4}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           />
         </div>
 
@@ -168,13 +176,17 @@ export const SongForm = () => {
             value={formData.mediaLink || ''}
             onChange={e => setFormData(prev => ({ ...prev, mediaLink: e.target.value }))}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           />
         </div>
 
         <div className="flex space-x-4">
           <button
             type="submit"
-            className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+            className={`flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium flex items-center justify-center space-x-2 ${
+              (isEditing && !isAdmin) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+            }`}
+            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
           >
             <Save size={20} />
             <span>Enregistrer</span>
@@ -183,7 +195,7 @@ export const SongForm = () => {
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center"
+              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center hover:bg-red-50"
             >
               <Trash size={20} />
             </button>

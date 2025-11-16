@@ -30,7 +30,8 @@ const defaultSettings: PrompterSettings = {
 const SongContext = createContext<SongContextType | null>(null);
 
 export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { session, loading: sessionLoading } = useSession();
+  const { session, loading: sessionLoading, userProfile } = useSession(); // Récupération de userProfile
+  const isAdmin = userProfile?.role === 'admin'; // Détermination du rôle admin
   const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [prompterSettings, setPrompterSettings] = useState<PrompterSettings>(() => {
@@ -76,7 +77,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [sessionLoading, session, fetchSongs]);
 
   const addSong = async (song: Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!session?.user) return;
+    if (!session?.user || !isAdmin) { // Vérification isAdmin
+      console.warn('Seuls les administrateurs peuvent ajouter des chants.');
+      return;
+    }
 
     const { data, error } = await supabase
       .from('songs')
@@ -92,13 +96,16 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const editSong = async (song: Song) => {
-    if (!session?.user) return;
+    if (!session?.user || !isAdmin) { // Vérification isAdmin
+      console.warn('Seuls les administrateurs peuvent modifier des chants.');
+      return;
+    }
 
     const { data, error } = await supabase
       .from('songs')
       .update(song)
       .eq('id', song.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', session.user.id) // Garder cette vérification pour s'assurer que l'admin modifie son propre chant ou un chant existant
       .select()
       .single();
 
@@ -110,14 +117,17 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteSong = async (id: string) => {
-    if (!session?.user) return;
+    if (!session?.user || !isAdmin) { // Vérification isAdmin
+      console.warn('Seuls les administrateurs peuvent supprimer des chants.');
+      return;
+    }
 
     const { error } = await supabase
       .from('songs')
       .delete()
       .eq('id', id)
-      .eq('user_id', session.user.id);
-
+      .eq('user_id', session.user.id); // Garder cette vérification
+      
     if (error) {
       console.error('Erreur lors de la suppression du chant:', error);
     } else {
@@ -147,14 +157,17 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteSelectedSongs = async () => {
-    if (!session?.user || selectedSongs.size === 0) return;
+    if (!session?.user || !isAdmin || selectedSongs.size === 0) { // Vérification isAdmin
+      console.warn('Seuls les administrateurs peuvent supprimer des chants sélectionnés.');
+      return;
+    }
 
     if (window.confirm(`Voulez-vous vraiment supprimer ${selectedSongs.size} chant(s) ?`)) {
       const { error } = await supabase
         .from('songs')
         .delete()
         .in('id', Array.from(selectedSongs))
-        .eq('user_id', session.user.id);
+        .eq('user_id', session.user.id); // Garder cette vérification
 
       if (error) {
         console.error('Erreur lors de la suppression des chants sélectionnés:', error);
@@ -166,7 +179,10 @@ export const SongProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const importSongs = async (newSongs: Array<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
-    if (!session?.user || newSongs.length === 0) return;
+    if (!session?.user || !isAdmin || newSongs.length === 0) { // Vérification isAdmin
+      console.warn('Seuls les administrateurs peuvent importer des chants.');
+      return;
+    }
 
     const songsToInsert = newSongs.map(song => ({
       ...song,

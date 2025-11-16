@@ -63,7 +63,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) 
             )}
           </div>
         </div>
-        {showActions && (
+        {showActions && isAdmin && ( {/* Afficher le lien d'édition seulement pour les admins */}
           <Link
             to={`/edit/${song.id}`}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
