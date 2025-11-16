@@ -153,6 +153,7 @@ export const SongView = () => {
           // Calculer le pourcentage de défilement effectué
           const progress = currentScrollTop / scrollHeight;
           // Calculer le nouveau temps écoulé basé sur cette progression et la nouvelle durée totale
+          // Cela permet de reprendre le défilement à la même position relative mais avec la nouvelle vitesse
           const newElapsedTime = progress * newTotalDuration;
 
           setElapsedTimeAtPause(newElapsedTime); // Mettre à jour l'état pour une reprise correcte si mis en pause plus tard
@@ -195,9 +196,9 @@ export const SongView = () => {
             <div className="flex items-center space-x-2">
               <input
                 type="range"
-                min="10" {/* Changé de 30 à 10 */}
-                max="150"
-                step="10"
+                min={10}
+                max={150}
+                step={10}
                 value={bpm}
                 onChange={(e) => {
                   setBpm(Number(e.target.value));
