@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash } from 'lucide-react';
 import { useSongs } from '../context/SongContext';
-import { useSession } from '../context/SessionContext'; // Import de useSession
+import { useSession } from '../context/SessionContext';
+import { useAppContext } from '../context/AppContext'; // Import de useAppContext
 import { Song, SongCategory, CATEGORY_COLORS } from '../types';
 
 // Ajustement du type pour initialSong pour correspondre à ce qui est passé à addSong
@@ -18,16 +19,15 @@ export const SongForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, addSong, editSong, deleteSong } = useSongs();
-  const { userProfile, loading: sessionLoading } = useSession(); // Récupération du profil utilisateur et état de chargement
-  const isAdmin = userProfile?.role === 'admin'; // Vérification du rôle admin
+  const { userProfile, loading: sessionLoading } = useSession();
+  const { appSettings } = useAppContext(); // Utilisation du nouveau contexte pour le mode sombre
+  const isAdmin = userProfile?.role === 'admin';
   // Le type de formData doit correspondre à initialSong
   const [formData, setFormData] = useState<Omit<Song, 'id' | 'user_id' | 'created_at' | 'updated_at'>>(initialSong);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (!sessionLoading) {
-      // Si c'est une nouvelle création (pas d'ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
-      // Ou si c'est une édition (ID dans l'URL) et que l'utilisateur n'est pas admin, rediriger
       if ((!id && !isAdmin) || (id && !isAdmin)) {
         navigate('/');
       }
@@ -38,8 +38,6 @@ export const SongForm = () => {
     if (id) {
       const song = songs.find(s => s.id === id);
       if (song) {
-        // Lors de l'édition, nous avons un objet Song complet, mais formData ne gère pas id, user_id, created_at, updated_at
-        // Nous devons donc omettre ces propriétés lors de la mise à jour de formData
         const { id: songId, user_id, created_at, updated_at, ...rest } = song;
         setFormData(rest);
       }
@@ -56,7 +54,6 @@ export const SongForm = () => {
     
     setError('');
     if (id) {
-      // Lors de l'édition, nous devons inclure l'id, user_id, created_at, updated_at
       const existingSong = songs.find(s => s.id === id);
       if (existingSong) {
         editSong({ ...formData, id, user_id: existingSong.user_id, created_at: existingSong.created_at, updated_at: existingSong.updated_at });
@@ -74,20 +71,18 @@ export const SongForm = () => {
     }
   };
 
-  // Si la session est en cours de chargement ou si l'utilisateur n'est pas admin et tente d'ajouter/éditer, ne rien afficher
   if (sessionLoading || (!id && !isAdmin) || (id && !isAdmin)) {
     return null; 
   }
 
   const isEditing = !!id;
-  const canSubmit = isAdmin || !isEditing; // Les non-admins peuvent soumettre seulement s'ils ne sont pas en mode édition (ce cas est déjà géré par la redirection)
 
   return (
-    <div className="p-4 pb-20">
-      <div className="flex items-center justify-between mb-6 pt-safe-area"> {/* Ajout de pt-safe-area ici */}
+    <div className={`p-4 pb-20 min-h-screen ${appSettings.isAppDarkMode ? 'bg-gray-900 text-gray-200' : 'bg-gray-50 text-gray-900'}`}>
+      <div className="flex items-center justify-between mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-full"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
         >
           <ArrowLeft size={24} />
         </button>
@@ -99,28 +94,28 @@ export const SongForm = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1">
             Titre
           </label>
           <input
             type="text"
             value={formData.title}
             onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            disabled={isEditing && !isAdmin}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1">
             Catégorie
           </label>
           <select
             value={formData.category}
             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value as SongCategory }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             style={{ backgroundColor: `${CATEGORY_COLORS[formData.category]}15` }}
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            disabled={isEditing && !isAdmin}
           >
             <option value="angola">Angola</option>
             <option value="saoBentoPequeno">São Bento Pequeno</option>
@@ -133,17 +128,17 @@ export const SongForm = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1">
             Phrase mnémotechnique
           </label>
           <input
             type="text"
             value={formData.mnemonic || ''}
             onChange={e => setFormData(prev => ({ ...prev, mnemonic: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            disabled={isEditing && !isAdmin}
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Le titre ou la phrase mnémotechnique est obligatoire
           </p>
         </div>
@@ -155,28 +150,28 @@ export const SongForm = () => {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1">
             Paroles
           </label>
           <textarea
             value={formData.lyrics || ''}
             onChange={e => setFormData(prev => ({ ...prev, lyrics: e.target.value }))}
             rows={4}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            disabled={isEditing && !isAdmin}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1">
             Lien média
           </label>
           <input
             type="url"
             value={formData.mediaLink || ''}
             onChange={e => setFormData(prev => ({ ...prev, mediaLink: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            disabled={isEditing && !isAdmin}
           />
         </div>
 
@@ -186,16 +181,16 @@ export const SongForm = () => {
             className={`flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium flex items-center justify-center space-x-2 ${
               (isEditing && !isAdmin) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
             }`}
-            disabled={isEditing && !isAdmin} // Désactiver si édition et non-admin
+            disabled={isEditing && !isAdmin}
           >
             <Save size={20} />
             <span>Enregistrer</span>
           </button>
-          {id && isAdmin && ( // Afficher le bouton de suppression seulement pour les admins
+          {id && isAdmin && (
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center hover:bg-red-50"
+              className="px-4 py-3 text-red-600 border border-red-600 rounded-lg font-medium flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900 dark:text-red-400 dark:border-red-400"
             >
               <Trash size={20} />
             </button>
