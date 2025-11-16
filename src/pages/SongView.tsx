@@ -153,7 +153,7 @@ export const SongView = () => {
       </div>
 
       {!isReading ? (
-        <div className="p-4 pb-24">
+        <div className="p-4 pb-32"> {/* Augmentation du padding-bottom */}
           <h1 className="text-xl font-bold mb-6">{song.title}</h1>
 
           {song.mnemonic && (
@@ -213,7 +213,7 @@ export const SongView = () => {
       )}
 
       {song.mediaLink && !isReading && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 bg-inherit border-t">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 p-4 bg-inherit border-t"> {/* Ajustement du bottom */}
           <a
             href={song.mediaLink}
             target="_blank"

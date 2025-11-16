@@ -19,7 +19,7 @@ export const Navigation = () => {
   const activeIconClass = appSettings.isAppDarkMode ? 'text-blue-400' : 'text-blue-600';
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 border-t pb-safe ${navBgClass}`}>
+    <nav className={`fixed bottom-0 left-0 right-0 border-t pb-safe-area ${navBgClass}`}>
       <div className="flex justify-around items-center h-16">
         <Link
           to="/"
