@@ -186,7 +186,7 @@ export const SongView = () => {
           {song.lyrics && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); toggleReading(); }} {/* Ajout de e.stopPropagation() */}
+                onClick={(e) => { e.stopPropagation(); toggleReading(); }}
                 className="p-2 hover:bg-gray-100 rounded-full"
               >
                 {isReading ? <Pause size={24} /> : <Play size={24} />}
