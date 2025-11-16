@@ -195,7 +195,7 @@ export const SongView = () => {
                 <div className="flex items-center space-x-2">
                   <input
                     type="range"
-                    min="0" {/* Changé de "30" à "0" */}
+                    min="30"
                     max="150"
                     step="10"
                     value={bpm}
