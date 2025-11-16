@@ -153,7 +153,7 @@ export const SongView = () => {
       </div>
 
       {!isReading ? (
-        <div className="p-4 pb-16">
+        <div className="p-4 pb-24">
           <h1 className="text-xl font-bold mb-6">{song.title}</h1>
 
           {song.mnemonic && (
