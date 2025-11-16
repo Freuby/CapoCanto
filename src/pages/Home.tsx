@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Trash2, DownloadCloud, Search, ChevronDown, X, HelpCircle } from 'lucide-react'; // Ajout de X et HelpCircle
+import { Settings, Trash2, DownloadCloud, Search, ChevronDown, X, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext';
@@ -266,6 +266,7 @@ export const Home = () => {
       <HelpModal
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
+        isAdmin={isAdmin} // Passage de la prop isAdmin
       />
     </div>
   );

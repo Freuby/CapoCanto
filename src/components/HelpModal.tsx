@@ -1,12 +1,13 @@
 import React from 'react';
-import { X, Home, Plus, Play, Settings, Search, DownloadCloud, Music, Edit, Trash2 } from 'lucide-react';
+import { X, Home, Plus, Play, Settings, Search, DownloadCloud, Music, Edit, Trash2, HelpCircle } from 'lucide-react';
 
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isAdmin: boolean; // Ajout de la prop isAdmin
 }
 
-export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, isAdmin }) => {
   if (!isOpen) return null;
 
   return (
@@ -26,7 +27,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-100">1. Navigation principale</h3>
             <ul className="list-disc list-inside space-y-1 ml-4">
               <li><Home size={16} className="inline-block mr-2" /> <strong>Accueil</strong> : Liste de tous vos chants, organisés par catégorie.</li>
-              <li><Plus size={16} className="inline-block mr-2" /> <strong>Ajouter</strong> (Admin) : Créez de nouveaux chants.</li>
+              {isAdmin && ( // Afficher seulement pour les admins
+                <li><Plus size={16} className="inline-block mr-2" /> <strong>Ajouter</strong> : Créez de nouveaux chants.</li>
+              )}
               <li><Play size={16} className="inline-block mr-2" /> <strong>Prompteur</strong> : Un outil pour pratiquer les chants en rotation automatique.</li>
             </ul>
           </div>
@@ -35,9 +38,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-100">2. Gérer les chants (Accueil)</h3>
             <ul className="list-disc list-inside space-y-1 ml-4">
               <li><Search size={16} className="inline-block mr-2" /> <strong>Recherche</strong> : Trouvez rapidement un chant par titre, phrase mnémotechnique ou paroles.</li>
-              <li><DownloadCloud size={16} className="inline-block mr-2" /> <strong>Import/Export</strong> (Admin) : Importez ou exportez vos chants via un fichier CSV.</li>
+              {isAdmin && ( // Afficher seulement pour les admins
+                <li><DownloadCloud size={16} className="inline-block mr-2" /> <strong>Import/Export</strong> : Importez ou exportez vos chants via un fichier CSV.</li>
+              )}
               <li><Settings size={16} className="inline-block mr-2" /> <strong>Paramètres</strong> : Ajustez les réglages de l'application et du prompteur.</li>
-              <li><Trash2 size={16} className="inline-block mr-2" /> <strong>Supprimer la sélection</strong> (Admin) : Supprimez plusieurs chants à la fois.</li>
+              {isAdmin && ( // Afficher seulement pour les admins
+                <li><Trash2 size={16} className="inline-block mr-2" /> <strong>Supprimer la sélection</strong> : Supprimez plusieurs chants à la fois.</li>
+              )}
             </ul>
           </div>
 
@@ -47,7 +54,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <li>Cliquez sur une tuile de chant pour voir ses détails (paroles, lien média).</li>
               <li><Play size={16} className="inline-block mr-2" /> <strong>Mode lecture</strong> : Faites défiler automatiquement les paroles avec un BPM ajustable.</li>
               <li><Music size={16} className="inline-block mr-2" /> <strong>Lien média</strong> : Accédez directement à la ressource audio/vidéo du chant.</li>
-              <li><Edit size={16} className="inline-block mr-2" /> <strong>Modifier</strong> (Admin) : Modifiez les informations d'un chant.</li>
+              {isAdmin && ( // Afficher seulement pour les admins
+                <li><Edit size={16} className="inline-block mr-2" /> <strong>Modifier</strong> : Modifiez les informations d'un chant.</li>
+              )}
             </ul>
           </div>
 
