@@ -56,6 +56,16 @@ export const VIVID_CATEGORY_COLORS = { // Couleurs vives pour les tuiles
   autre: '#778899', // LightSlateGray
 } as const;
 
+export const DARK_MODE_MUTED_CATEGORY_COLORS = { // Couleurs atténuées pour le mode sombre
+  angola: '#8B801C',
+  saoBentoPequeno: '#026B01',
+  saoBentoGrande: '#034A7A',
+  sambaDeRoda: '#B34F3A',
+  maculele: '#6D21B3',
+  puxadaDeRede: '#B39900',
+  autre: '#6B6B6B',
+} as const;
+
 export const FONT_SIZES = {
   small: '1.5rem',
   medium: '2rem',

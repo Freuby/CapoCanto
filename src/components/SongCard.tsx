@@ -1,7 +1,7 @@
 import React from 'react';
 import { Music, Edit } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Song, CATEGORY_COLORS, VIVID_CATEGORY_COLORS } from '../types'; // Import de VIVID_CATEGORY_COLORS
+import { Song, CATEGORY_COLORS, VIVID_CATEGORY_COLORS, DARK_MODE_MUTED_CATEGORY_COLORS } from '../types'; // Import de DARK_MODE_MUTED_CATEGORY_COLORS
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext';
 import { useAppContext } from '../context/AppContext'; // Import du nouveau contexte
@@ -19,10 +19,21 @@ export const SongCard: React.FC<SongCardProps> = ({ song, showActions = true }) 
   const navigate = useNavigate();
   const isSelected = selectedSongs.has(song.id);
 
-  // Déterminer la couleur de fond en fonction du paramètre useVividColors
-  const baseColor = appSettings.useVividColors ? VIVID_CATEGORY_COLORS[song.category] : CATEGORY_COLORS[song.category];
-  const bgColor = appSettings.useVividColors ? baseColor : `${baseColor}15`;
+  let bgColor: string;
 
+  if (appSettings.isAppDarkMode) {
+    if (appSettings.useVividColors) {
+      bgColor = VIVID_CATEGORY_COLORS[song.category]; // Couleurs vives pour le mode sombre
+    } else {
+      bgColor = DARK_MODE_MUTED_CATEGORY_COLORS[song.category]; // Couleurs atténuées pour le mode sombre
+    }
+  } else { // Mode clair
+    if (appSettings.useVividColors) {
+      bgColor = VIVID_CATEGORY_COLORS[song.category]; // Couleurs vives pour le mode clair
+    } else {
+      bgColor = `${CATEGORY_COLORS[song.category]}15`; // Couleurs atténuées avec opacité pour le mode clair
+    }
+  }
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
