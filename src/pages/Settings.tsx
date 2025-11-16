@@ -29,7 +29,7 @@ export const Settings = () => {
   const appVersion = `CapoCanto version de ${month} ${year}`;
 
   return (
-    <div className="p-4 dark:bg-gray-900 dark:text-gray-200 min-h-screen">
+    <div className="p-4 pb-safe-area dark:bg-gray-900 dark:text-gray-200 min-h-screen">
       <div className="flex items-center mb-6 pt-safe-area">
         <button
           onClick={() => navigate(-1)}
