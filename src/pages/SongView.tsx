@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Music, Play, Pause } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { CATEGORY_COLORS, READING_FONT_SIZE, SongCategory } from '../types'; // Ajout de SongCategory
+import { READING_FONT_SIZE, SongCategory } from '../types'; // Ajout de SongCategory
+import { formatLyrics } from '../utils/songUtils'; // Import de la fonction utilitaire
 
 const DEFAULT_BPM: Record<SongCategory, number> = { // Typage de DEFAULT_BPM
   angola: 60,
@@ -14,17 +15,7 @@ const DEFAULT_BPM: Record<SongCategory, number> = { // Typage de DEFAULT_BPM
   autre: 80,
 };
 
-const formatLyrics = (lyrics: string, category: SongCategory) => { // Typage de category
-  return lyrics
-    .split('\n')
-    .map((line, _index) => { // _index pour marquer comme inutilisé
-      if (line.toLowerCase().includes('coro')) {
-        return `<span style="color: ${CATEGORY_COLORS[category]}">${line}</span>`;
-      }
-      return line;
-    })
-    .join('\n');
-};
+// La fonction formatLyrics a été déplacée vers src/utils/songUtils.ts
 
 export const SongView = () => {
   const { id } = useParams();

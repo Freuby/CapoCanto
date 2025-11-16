@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { RotateCcw, Settings, Home, Music } from 'lucide-react'; // Ajout de Music
+import { RotateCcw, Settings, Home, Music, ArrowLeft } from 'lucide-react'; // Ajout de Music et ArrowLeft
 import { Link, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { Song, CATEGORY_COLORS, FONT_SIZES } from '../types';
+import { formatLyrics } from '../utils/songUtils'; // Import de la fonction utilitaire
 
 const PrompterSong: React.FC<{
   song: Song | null;
@@ -111,24 +112,64 @@ export const Prompter = () => {
   const textColor = prompterSettings.isDarkMode ? 'text-white' : 'text-black';
 
   if (showLyrics) {
-    const lyrics = prompterSettings.upperCase ? 
-      showLyrics.lyrics?.toUpperCase() : 
-      showLyrics.lyrics;
+    const titleText = prompterSettings.upperCase ? showLyrics.title.toUpperCase() : showLyrics.title;
+    const mnemonicText = prompterSettings.upperCase ? showLyrics.mnemonic?.toUpperCase() : showLyrics.mnemonic;
+    const lyricsText = prompterSettings.upperCase ? showLyrics.lyrics?.toUpperCase() : showLyrics.lyrics;
 
     return (
-      <div className={`min-h-screen ${bgColor} ${textColor} p-6 safe-area-inset`}>
-        <button
-          onClick={() => setShowLyrics(null)}
-          className={`mb-6 ${textColor}`}
-        >
-          ← Retour au prompteur
-        </button>
-        <h2 className="text-2xl font-bold mb-4">{showLyrics.title}</h2>
-        <pre className="whitespace-pre-wrap font-sans">
-          {lyrics || 'Pas de paroles disponibles'}
-        </pre>
+      <div className={`min-h-screen ${bgColor} ${textColor} safe-area-inset`}>
+        <div className="sticky top-0 z-10 flex items-center px-4 pt-safe-area pb-4 bg-inherit">
+          <button
+            onClick={() => setShowLyrics(null)}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <ArrowLeft size={24} />
+          </button>
+        </div>
+
+        <div className="p-4 pb-32"> {/* Increased padding-bottom for media link button */}
+          <h1 className="text-xl font-bold mb-6">{titleText}</h1> {/* Title moved here */}
+
+          {showLyrics.mnemonic && (
+            <div className="mb-6">
+              <h2 className="text-sm font-medium text-gray-500 mb-2">
+                Phrase mnémotechnique
+              </h2>
+              <p className="text-lg">{mnemonicText}</p>
+            </div>
+          )}
+
+          {showLyrics.lyrics && (
+            <div className="mb-6">
+              <h2 className="text-sm font-medium text-gray-500 mb-2">
+                Paroles
+              </h2>
+              <pre
+                className="whitespace-pre-wrap font-sans text-lg"
+                dangerouslySetInnerHTML={{
+                  __html: formatLyrics(lyricsText || '', showLyrics.category),
+                }}
+              />
+            </div>
+          )}
+
+          {showLyrics.mediaLink && (
+            <div className="mb-6">
+              <h2 className="text-sm font-medium text-gray-500 mb-2">Média</h2>
+              <a
+                href={showLyrics.mediaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline break-all"
+              >
+                {showLyrics.mediaLink}
+              </a>
+            </div>
+          )}
+        </div>
+
         {showLyrics.mediaLink && (
-          <div className="fixed bottom-6 left-6 right-6">
+          <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 p-4 bg-inherit border-t">
             <a
               href={showLyrics.mediaLink}
               target="_blank"
