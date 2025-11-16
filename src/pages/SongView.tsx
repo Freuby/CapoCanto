@@ -1,33 +1,42 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { ArrowLeft, Music, Play, Pause } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
-import { READING_FONT_SIZE, SongCategory } from '../types'; // Ajout de SongCategory
-import { formatLyrics } from '../utils/songUtils'; // Import de la fonction utilitaire
+import { READING_FONT_SIZE, SongCategory } from '../types';
+import { formatLyrics } from '../utils/songUtils';
 
-const DEFAULT_BPM: Record<SongCategory, number> = { // Typage de DEFAULT_BPM
+const DEFAULT_BPM: Record<SongCategory, number> = {
   angola: 60,
   saoBentoPequeno: 85,
   saoBentoGrande: 120,
-  sambaDeRoda: 90, // Ajout des nouvelles catégories
+  sambaDeRoda: 90,
   maculele: 110,
   puxadaDeRede: 70,
   autre: 80,
 };
-
-// La fonction formatLyrics a été déplacée vers src/utils/songUtils.ts
 
 export const SongView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { songs, prompterSettings } = useSongs();
   const song = songs.find((s) => s.id === id);
+
   const [isReading, setIsReading] = useState(false);
   const [bpm, setBpm] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0); // Position de défilement à la pause
+  const [elapsedTimeAtPause, setElapsedTimeAtPause] = useState(0); // Temps écoulé à la pause
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
-  const startTimeRef = useRef<number>();
-  const scrollHeightRef = useRef<number>(0);
+  const animationFrameIdRef = useRef<number>(); // ID de l'animation
+  const startTimeRef = useRef<number>(); // Timestamp du début de l'animation actuelle
+
+  // Calcule la durée totale du défilement pour le chant entier
+  const calculateTotalDuration = useCallback(() => {
+    if (!scrollContainerRef.current || bpm === 0) return 0;
+    const scrollHeight = scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight;
+    // Formule ajustée pour que le BPM influence la durée totale du défilement
+    return (scrollHeight / (bpm / 6)) * 200;
+  }, [bpm]);
 
   useEffect(() => {
     if (song) {
@@ -42,58 +51,122 @@ export const SongView = () => {
     };
   }, [isReading]);
 
-  const startScrolling = () => {
+  const stopScrolling = useCallback(() => {
+    if (animationFrameIdRef.current) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = undefined;
+    }
+  }, []);
+
+  const startScrolling = useCallback((initialScrollTop: number, initialElapsedTime: number) => {
     if (!scrollContainerRef.current) return;
 
-    const scrollHeight =
-      scrollContainerRef.current.scrollHeight -
-      scrollContainerRef.current.clientHeight;
-    scrollHeightRef.current = scrollHeight;
-    startTimeRef.current = performance.now();
+    const scrollHeight = scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight;
+    if (scrollHeight <= 0) { // Pas besoin de défiler si le contenu tient
+      setIsReading(false);
+      return;
+    }
+
+    const totalDuration = calculateTotalDuration();
+    if (totalDuration === 0) { // Éviter la division par zéro ou un défilement infini
+      setIsReading(false);
+      return;
+    }
+
+    // Définir la position de défilement initiale
+    scrollContainerRef.current.scrollTop = initialScrollTop;
+
+    // Ajuster le temps de début pour tenir compte du temps déjà écoulé
+    startTimeRef.current = performance.now() - initialElapsedTime;
 
     const animate = (currentTime: number) => {
       if (!startTimeRef.current || !scrollContainerRef.current) return;
 
       const elapsedTime = currentTime - startTimeRef.current;
-      // Ajustement de la durée en fonction du BPM (multiplié par 10 pour une vitesse plus rapide)
-      const duration = (scrollHeightRef.current / (bpm / 6)) * 200; // Réduit de 2000 à 200 et bpm de 60 à 6
-      const progress = Math.min(elapsedTime / duration, 1);
+      const progress = Math.min(elapsedTime / totalDuration, 1);
 
-      scrollContainerRef.current.scrollTop = scrollHeightRef.current * progress;
+      scrollContainerRef.current.scrollTop = scrollHeight * progress;
 
       if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
+        animationFrameIdRef.current = requestAnimationFrame(animate);
       } else {
+        // Défilement terminé
         setIsReading(false);
+        scrollContainerRef.current.scrollTop = 0; // Réinitialiser en haut
+        setScrollPosition(0); // Réinitialiser la position enregistrée
+        setElapsedTimeAtPause(0); // Réinitialiser le temps écoulé
+        stopScrolling(); // S'assurer que l'animation est annulée
       }
     };
 
-    animationRef.current = requestAnimationFrame(animate);
-  };
-
-  const stopScrolling = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-  };
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+  }, [calculateTotalDuration, stopScrolling]);
 
   const toggleReading = () => {
     if (isReading) {
+      // Pause
       stopScrolling();
       setIsReading(false);
+      // Enregistrer la position de défilement actuelle et le temps écoulé
+      if (scrollContainerRef.current && startTimeRef.current) {
+        setScrollPosition(scrollContainerRef.current.scrollTop);
+        setElapsedTimeAtPause(performance.now() - startTimeRef.current);
+      }
     } else {
+      // Lecture / Reprise
       setIsReading(true);
-      startScrolling();
+      // Si le chant a été entièrement défilé, réinitialiser au début
+      const isAtEnd = scrollContainerRef.current && 
+                      scrollPosition >= (scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight - 1); // -1 pour la précision des flottants
+      
+      if (isAtEnd) {
+        setScrollPosition(0);
+        setElapsedTimeAtPause(0);
+        startScrolling(0, 0);
+      } else {
+        startScrolling(scrollPosition, elapsedTimeAtPause);
+      }
     }
   };
 
+  // Effet pour arrêter le défilement lorsque le composant est démonté ou que le chant change
   useEffect(() => {
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      stopScrolling();
+      // Réinitialiser les états lors de la sortie de la vue du chant ou du changement de chant
+      setIsReading(false);
+      setScrollPosition(0);
+      setElapsedTimeAtPause(0);
     };
-  }, []);
+  }, [id, stopScrolling]); // Dépend de l'ID pour réinitialiser lors de la navigation vers un autre chant
+
+  // Effet pour redémarrer le défilement si le BPM change pendant la lecture
+  useEffect(() => {
+    if (isReading) {
+      stopScrolling(); // Arrêter l'animation actuelle
+      if (scrollContainerRef.current) {
+        const currentScrollTop = scrollContainerRef.current.scrollTop;
+        const scrollHeight = scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight;
+        const newTotalDuration = calculateTotalDuration();
+
+        if (scrollHeight > 0 && newTotalDuration > 0) {
+          // Calculer le pourcentage de défilement effectué
+          const progress = currentScrollTop / scrollHeight;
+          // Calculer le nouveau temps écoulé basé sur cette progression et la nouvelle durée totale
+          const newElapsedTime = progress * newTotalDuration;
+
+          setElapsedTimeAtPause(newElapsedTime); // Mettre à jour l'état pour une reprise correcte si mis en pause plus tard
+          startScrolling(currentScrollTop, newElapsedTime); // Redémarrer depuis la position actuelle avec la nouvelle vitesse
+        } else {
+          // Si le contenu est trop petit ou la durée est nulle, arrêter la lecture
+          setIsReading(false);
+          setScrollPosition(0);
+          setElapsedTimeAtPause(0);
+        }
+      }
+    }
+  }, [bpm, isReading, startScrolling, stopScrolling, calculateTotalDuration]);
+
 
   if (!song) return null;
 
@@ -128,10 +201,7 @@ export const SongView = () => {
                     value={bpm}
                     onChange={(e) => {
                       setBpm(Number(e.target.value));
-                      if (isReading) {
-                        stopScrolling();
-                        startScrolling();
-                      }
+                      // L'effet useEffect pour le changement de BPM gérera le redémarrage du défilement
                     }}
                     className="w-24"
                   />
@@ -144,7 +214,7 @@ export const SongView = () => {
       </div>
 
       {!isReading ? (
-        <div className="p-4 pb-32"> {/* Augmentation du padding-bottom */}
+        <div className="p-4 pb-32">
           <h1 className="text-xl font-bold mb-6">{song.title}</h1>
 
           {song.mnemonic && (
@@ -204,7 +274,7 @@ export const SongView = () => {
       )}
 
       {song.mediaLink && !isReading && (
-        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 p-4 bg-inherit border-t"> {/* Ajustement du bottom */}
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 p-4 bg-inherit border-t">
           <a
             href={song.mediaLink}
             target="_blank"
