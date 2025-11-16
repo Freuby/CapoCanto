@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, DownloadCloud, Search, ChevronDown } from 'lucide-react';
+import { Settings, Trash2, DownloadCloud, Search, ChevronDown, X } from 'lucide-react'; // Ajout de X
 import { Link } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext'; // Import de useSession
@@ -155,13 +155,24 @@ export const Home = () => {
         </div>
 
         {showSearchBar && (
-          <input
-            type="text"
-            placeholder="Rechercher un chant..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
+          <div className="relative mt-4"> {/* Conteneur pour la barre de recherche et le bouton X */}
+            <input
+              type="text"
+              placeholder="Rechercher un chant..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 pr-10" // Ajout de pr-10 pour l'espace du bouton
+            />
+            {searchQuery && ( // Afficher le bouton X seulement si searchQuery n'est pas vide
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                title="Effacer la recherche"
+              >
+                <X size={20} />
+              </button>
+            )}
+          </div>
         )}
       </div>
 
