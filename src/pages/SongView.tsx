@@ -189,7 +189,7 @@ export const SongView = () => {
                 onClick={(e) => { e.stopPropagation(); toggleReading(); }}
                 className="p-2 hover:bg-gray-100 rounded-full"
               >
-                {isReading ? <Pause size={24} /> : <Play size={24} />}
+                <Play size={24} /> {/* Affiche toujours l'icône Play */}
               </button>
               {isReading && (
                 <div className="flex items-center space-x-2">
