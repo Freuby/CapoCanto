@@ -1,5 +1,5 @@
 import { ArrowLeft, LogOut } from 'lucide-react';
-import { useNavigate } => 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { useSession } from '../context/SessionContext';
 import { useAppContext } from '../context/AppContext'; // Import du nouveau contexte
