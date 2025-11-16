@@ -178,7 +178,7 @@ export const SongView = () => {
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-safe-area pb-4 bg-inherit">
         <button
           onClick={() => navigate(-1)}
-          className={`p-2 hover:bg-gray-100 rounded-full ${isReading ? 'pointer-events-none opacity-0' : ''}`}
+          className={`p-2 hover:bg-gray-100 rounded-full ${isReading ? 'pointer-events-none opacity-0' : ''}`} {/* Désactiver et masquer en mode lecture */}
         >
           <ArrowLeft size={24} />
         </button>
