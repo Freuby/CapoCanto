@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowLeft, Music, Play, Pause } from 'lucide-react';
+import { ArrowLeft, Music, Play, Pause, Share2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSongs } from '../context/SongContext';
 import { READING_FONT_SIZE, SongCategory } from '../types';
@@ -103,31 +103,53 @@ export const SongView = () => {
   }, [calculateTotalDuration, stopScrolling]);
 
   const toggleReading = () => {
-    if (isReading) {
-      // Pause
-      stopScrolling();
-      setIsReading(false);
-      // Enregistrer la position de défilement actuelle et le temps écoulé
-      if (scrollContainerRef.current && startTimeRef.current) {
-        setScrollPosition(scrollContainerRef.current.scrollTop);
-        setElapsedTimeAtPause(performance.now() - startTimeRef.current);
-      }
-    } else {
-      // Lecture / Reprise
-      setIsReading(true);
-      // Si le chant a été entièrement défilé, réinitialiser au début
-      const isAtEnd = scrollContainerRef.current && 
-                      scrollPosition >= (scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight - 1); // -1 pour la précision des flottants
-      
-      if (isAtEnd) {
-        setScrollPosition(0);
-        setElapsedTimeAtPause(0);
-        startScrolling(0, 0);
+      if (isReading) {
+        // Pause
+        stopScrolling();
+        setIsReading(false);
+        // Enregistrer la position de défilement actuelle et le temps écoulé
+        if (scrollContainerRef.current && startTimeRef.current) {
+          setScrollPosition(scrollContainerRef.current.scrollTop);
+          setElapsedTimeAtPause(performance.now() - startTimeRef.current);
+        }
       } else {
-        startScrolling(scrollPosition, elapsedTimeAtPause);
+        // Lecture / Reprise
+        setIsReading(true);
+        // Si le chant a été entièrement défilé, réinitialiser au début
+        const isAtEnd = scrollContainerRef.current &&
+                        scrollPosition >= (scrollContainerRef.current.scrollHeight - scrollContainerRef.current.clientHeight - 1); // -1 pour la précision des flottants
+        
+        if (isAtEnd) {
+          setScrollPosition(0);
+          setElapsedTimeAtPause(0);
+          startScrolling(0, 0);
+        } else {
+          startScrolling(scrollPosition, elapsedTimeAtPause);
+        }
       }
-    }
-  };
+    };
+  
+    const handleShare = () => {
+      if (!song) return;
+      const url = window.location.origin + '/chanson/' + song.id;
+      if (navigator.share) {
+        navigator.share({
+          title: song.title,
+          text: song.lyrics ? 'Découvrez ces paroles' : undefined,
+          url,
+        }).catch((error) => {
+          // Fallback: copy to clipboard
+          navigator.clipboard.writeText(url).then(() => {
+            // Optionally show a feedback message
+          });
+        });
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+          // Optionally show a feedback message
+        });
+      }
+    };
 
   // Effet pour arrêter le défilement lorsque le composant est démonté ou que le chant change
   useEffect(() => {
@@ -177,13 +199,24 @@ export const SongView = () => {
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} safe-area-inset`}>
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-safe-area pb-4 bg-inherit">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-full"
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <ArrowLeft size={24} />
+                </button>
+                {song.lyrics && (
+                  <button
+                    onClick={handleShare}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    aria-label="Partager"
+                  >
+                    <Share2 size={24} />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center space-x-4">
           {song.lyrics && !isReading && ( // Afficher le bouton Play uniquement si pas en mode lecture
             <button
               onClick={(e) => { e.stopPropagation(); toggleReading(); }}
