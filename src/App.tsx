@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { SongProvider } from './context/SongContext';
 import { SessionProvider, useSession } from './context/SessionContext';
 import { AppProvider, useAppContext } from './context/AppContext'; // Import du nouveau contexte
@@ -48,7 +48,7 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <HashRouter>
       <SessionProvider>
         <AppProvider> {/* Envelopper avec le nouveau AppProvider */}
           <SongProvider>
