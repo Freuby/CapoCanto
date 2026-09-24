@@ -130,8 +130,8 @@ export const SongView = () => {
     };
   
     const handleShare = () => {
-      if (!song) return;
-      const url = window.location.origin + '/chanson/' + song.id;
+        if (!song) return;
+        const url = window.location.origin + '/song/' + song.id;
       if (navigator.share) {
         navigator.share({
           title: song.title,
