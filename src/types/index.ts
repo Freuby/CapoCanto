@@ -29,6 +29,8 @@ export interface PrompterSettings {
   isDarkMode: boolean; // Ce paramètre reste pour le prompteur uniquement
   useHighContrast: boolean;
   upperCase: boolean;
+  specificCategory?: SongCategory; // Chant d'un seul type spécifique
+  categoryPairs?: ('angola-saoBentoPequeno' | 'saoBentoPequeno-saoBentoGrande') | null; // Paire de types spécifiques
 }
 
 export interface AppSettings { // Nouveaux paramètres d'application globaux

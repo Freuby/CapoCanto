@@ -53,13 +53,37 @@ export const Prompter = () => {
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
 
   const generateSongs = useCallback(() => {
-    setSongs([
-      getRandomSongByCategory('angola'),
-      getRandomSongByCategory('saoBentoPequeno'),
-      getRandomSongByCategory('saoBentoGrande'),
-    ]);
+    let songsToGenerate: (Song | null)[] = [];
+
+    // Priorité à specificCategory si défini
+    if (prompterSettings.specificCategory) {
+      songsToGenerate = [
+        getRandomSongByCategory(prompterSettings.specificCategory),
+        getRandomSongByCategory(prompterSettings.specificCategory),
+        getRandomSongByCategory(prompterSettings.specificCategory),
+      ];
+    }
+    // Sinon, utiliser categoryPairs si définie
+    else if (prompterSettings.categoryPairs) {
+      const [firstPair, secondPair] = prompterSettings.categoryPairs.split('-');
+      songsToGenerate = [
+        getRandomSongByCategory(firstPair as SongCategory),
+        getRandomSongByCategory(secondPair as SongCategory),
+        getRandomSongByCategory(secondPair as SongCategory),
+      ];
+    }
+    // Sinon, générer comme avant (un de chaque type)
+    else {
+      songsToGenerate = [
+        getRandomSongByCategory('angola'),
+        getRandomSongByCategory('saoBentoPequeno'),
+        getRandomSongByCategory('saoBentoGrande'),
+      ];
+    }
+
+    setSongs(songsToGenerate);
     setTimeLeft(prompterSettings.rotationInterval);
-  }, [getRandomSongByCategory, prompterSettings.rotationInterval]);
+  }, [getRandomSongByCategory, prompterSettings.rotationInterval, prompterSettings.specificCategory, prompterSettings.categoryPairs]);
 
   useEffect(() => {
     generateSongs();

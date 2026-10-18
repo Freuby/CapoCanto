@@ -25,6 +25,8 @@ const defaultSettings: PrompterSettings = {
   isDarkMode: true,
   useHighContrast: false,
   upperCase: false,
+  specificCategory: undefined,
+  categoryPairs: null,
 };
 
 const SongContext = createContext<SongContextType | null>(null);
